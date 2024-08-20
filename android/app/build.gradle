@@ -45,7 +45,7 @@
 //
 //    defaultConfig {
 //        // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
-//        applicationId "com.sixamtech.stack_food_vandor"
+//        applicationId "com.bento.vendora"
 //        minSdkVersion 21
 //        targetSdkVersion 34
 //        versionCode flutterVersionCode.toInteger()
@@ -113,7 +113,7 @@ if (keystorePropertiesFile.exists()) {
 }
 
 android {
-    namespace "com.sixamtech.stack_food_vandor"
+    namespace "com.bento.vendora"
     compileSdkVersion 34
     ndkVersion flutter.ndkVersion
 
@@ -135,7 +135,7 @@ android {
 
     defaultConfig {
         // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
-        applicationId "com.sixamtech.stack_food_vandor"
+        applicationId "com.bento.vendora"
         minSdkVersion 21
         targetSdkVersion 34
         versionCode flutterVersionCode.toInteger()

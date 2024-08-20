@@ -1,21 +1,21 @@
 import 'package:flutter/material.dart';
 
 const robotoRegular = TextStyle(
-  fontFamily: 'Roboto',
+  fontFamily: 'Lao',
   fontWeight: FontWeight.w400,
 );
 
 const robotoMedium = TextStyle(
-  fontFamily: 'Roboto',
+  fontFamily: 'Lao',
   fontWeight: FontWeight.w500,
 );
 
 const robotoBold = TextStyle(
-  fontFamily: 'Roboto',
+  fontFamily: 'Lao',
   fontWeight: FontWeight.w700,
 );
 
 const robotoBlack = TextStyle(
-  fontFamily: 'Roboto',
+  fontFamily: 'Lao',
   fontWeight: FontWeight.w900,
 );

@@ -31,10 +31,10 @@ Future<void> main() async {
   if(GetPlatform.isAndroid) {
       await Firebase.initializeApp(
         options: const FirebaseOptions(
-          apiKey: 'AIzaSyBScz65YN8J9YoKdtKPl4ecCB3Vkc7iNL8',
-          appId: '1:1049699819506:android:c80cf797b22c81f089956b',
-          messagingSenderId: '1049699819506',
-          projectId: 'stackfood-bd3ee',
+          apiKey: 'AIzaSyCHZCBLcVJf2NqZYsd37TzUxqzVcDI-2JU',
+          appId: '1:299589180044:web:b575785f8db4c9d93f79a9',
+          messagingSenderId: '299589180044',
+          projectId: 'bento-food',
         ),
       );
     } else {
