@@ -109,7 +109,7 @@ class _UpdateProfileScreenState extends State<UpdateProfileScreen> {
                             const SizedBox(height: 70),
 
                             CustomTextFieldWidget(
-                              titleText: 'write_first_name'.tr,
+                              hintText: 'enter_first_name'.tr,
                               controller: _firstNameController,
                               capitalization: TextCapitalization.words,
                               inputType: TextInputType.name,
@@ -118,12 +118,12 @@ class _UpdateProfileScreenState extends State<UpdateProfileScreen> {
                               prefixIcon: CupertinoIcons.person_alt_circle_fill,
                               labelText: 'first_name'.tr,
                               required: true,
-                              validator: (value) => ValidateCheck.validateEmptyText(value, "first_name_field_is_required".tr),
+                              validator: (value) => ValidateCheck.validateEmptyText(value, "please_enter_first_name".tr),
                             ),
                             const SizedBox(height: Dimensions.paddingSizeOverExtraLarge),
 
                             CustomTextFieldWidget(
-                              titleText: 'write_last_name'.tr,
+                              hintText: 'enter_last_name'.tr,
                               controller: _lastNameController,
                               capitalization: TextCapitalization.words,
                               inputType: TextInputType.name,
@@ -132,12 +132,12 @@ class _UpdateProfileScreenState extends State<UpdateProfileScreen> {
                               prefixIcon: CupertinoIcons.person_alt_circle_fill,
                               labelText: 'last_name'.tr,
                               required: true,
-                              validator: (value) => ValidateCheck.validateEmptyText(value, "last_name_field_is_required".tr),
+                              validator: (value) => ValidateCheck.validateEmptyText(value, "please_enter_last_name".tr),
                             ),
                             const SizedBox(height: Dimensions.paddingSizeOverExtraLarge),
 
                             CustomTextFieldWidget(
-                              titleText: 'write_phone_number'.tr,
+                              hintText: 'xxx-xxx-xxxxx'.tr,
                               controller: _phoneController,
                               focusNode: _phoneFocus,
                               inputType: TextInputType.phone,
@@ -204,7 +204,6 @@ class _UpdateProfileScreenState extends State<UpdateProfileScreen> {
                             buttonText: 'update'.tr,
                           ) : const SizedBox(height: 40, child: Center(child: CircularProgressIndicator())),
                         ),
-                        const SizedBox(height: 50),
 
                       ]),
                     ),

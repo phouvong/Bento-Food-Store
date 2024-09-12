@@ -56,7 +56,10 @@ class _HomeScreenState extends State<HomeScreen> {
           padding: const EdgeInsets.all(Dimensions.paddingSizeSmall),
           child: Image.asset(Images.logo, height: 30, width: 30),
         ),
-        titleSpacing: 0, elevation: 0,
+        titleSpacing: 0,
+        surfaceTintColor: Theme.of(context).cardColor,
+        shadowColor: Theme.of(context).disabledColor.withOpacity(0.5),
+        elevation: 2,
         title: Image.asset(Images.logoName, width: 120),
         actions: [IconButton(
           icon: GetBuilder<NotificationController>(builder: (notificationController) {
@@ -89,7 +92,7 @@ class _HomeScreenState extends State<HomeScreen> {
           await _loadData();
         },
         child: SingleChildScrollView(
-          padding: const EdgeInsets.all(Dimensions.paddingSizeSmall),
+          padding: const EdgeInsets.symmetric(vertical: Dimensions.paddingSizeDefault, horizontal: Dimensions.paddingSizeSmall),
           physics: const AlwaysScrollableScrollPhysics(),
           child: Column(children: [
 
@@ -101,7 +104,6 @@ class _HomeScreenState extends State<HomeScreen> {
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
                     color: Theme.of(context).cardColor,
-                    border: Border.all(color: Theme.of(context).disabledColor.withOpacity(0.5)),
                     boxShadow: const [BoxShadow(color: Colors.black12, spreadRadius: 0, blurRadius: 5)],
                   ),
                   child: Row(children: [
@@ -132,7 +134,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
                   ]),
                 ),
-                const SizedBox(height: Dimensions.paddingSizeSmall),
+                const SizedBox(height: Dimensions.paddingSizeDefault),
 
                 OrderSummaryCard(profileController: profileController),
                 const SizedBox(height: Dimensions.paddingSizeLarge),

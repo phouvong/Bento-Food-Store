@@ -91,12 +91,6 @@ class RestaurantController extends GetxController implements GetxService {
   bool? _isRestNonVeg = true;
   bool? get isRestNonVeg => _isRestNonVeg;
 
-  String _type = 'all';
-  String get type => _type;
-
-  static final List<String> _productTypeList = ['all', 'veg', 'non_veg'];
-  List<String> get productTypeList => _productTypeList;
-
   List<VariationModel>? _variationList;
   List<VariationModel>? get variationList => _variationList;
 
@@ -158,6 +152,45 @@ class RestaurantController extends GetxController implements GetxService {
   List<String>? get categoryNameList => _categoryNameList;
 
   List<int>? _categoryIdList;
+
+  int? _categoryId = 0;
+  int? get categoryId => _categoryId;
+
+  static final List<String> _productTypeList = ['all', 'veg', 'non_veg'];
+  List<String> get productTypeList => _productTypeList;
+
+  static final List<String> _foodStockList = ['all', 'stock_out'];
+  List<String> get foodStockList => _foodStockList;
+
+  String _selectedFoodType = 'all';
+  String get selectedFoodType => _selectedFoodType;
+
+  String _selectedStockType = 'all';
+  String get selectedStockType => _selectedStockType;
+
+  bool _isFilterClearLoading = false;
+  bool get isFilterClearLoading => _isFilterClearLoading;
+
+  void updateSelectedFoodType(String type) {
+    _selectedFoodType = type;
+    update();
+  }
+
+  void updateSelectedStockType(String type) {
+    _selectedStockType = type;
+    update();
+  }
+
+  void applyFilters({bool isClearFilter = false}) async{
+    isClearFilter ? _isFilterClearLoading = true : _isLoading = true;
+    update();
+
+    await getProductList(offset: '1', foodType: selectedFoodType, stockType: selectedStockType, categoryId: _categoryIndex != 0 ? _categoryIdList![_categoryIndex!] : 0);
+    Get.back();
+
+    isClearFilter ? _isFilterClearLoading = false : _isLoading = false;
+    update();
+  }
 
   void initSetup() {
     _isHalal = false;
@@ -321,24 +354,26 @@ class RestaurantController extends GetxController implements GetxService {
 
   }
 
-  void setCategory(int index, String type) {
+  void setCategory({required int index, required String foodType, required String stockType}) {
     _categoryIndex = index;
     _productList == null;
-    getProductList('1', type, categoryId: _categoryIndex != 0 ? _categoryIdList![index] : 0);
+    _categoryId = _categoryIdList![index];
+    getProductList(offset: '1', foodType: foodType, stockType: stockType, categoryId: _categoryIndex != 0 ? _categoryIdList![index] : 0);
     update();
   }
 
-  Future<void> getProductList(String offset, String type, {int? categoryId}) async {
+  Future<void> getProductList({required String offset, required String foodType, required String stockType, int? categoryId}) async {
     if(offset == '1') {
       _offsetList = [];
       _offset = 1;
-      _type = type;
+      _selectedFoodType = foodType;
+      _selectedStockType = stockType;
       _productList = null;
       update();
     }
     if (!_offsetList.contains(offset)) {
       _offsetList.add(offset);
-      ProductModel? productModel = await restaurantServiceInterface.getProductList(offset, type, categoryId);
+      ProductModel? productModel = await restaurantServiceInterface.getProductList(offset, foodType, stockType, categoryId);
       if (productModel != null) {
         if (offset == '1') {
           _productList = [];
@@ -407,8 +442,8 @@ class RestaurantController extends GetxController implements GetxService {
 
     bool isSuccess = await restaurantServiceInterface.updateRestaurant(restaurant, cuisines, _pickedLogo, _pickedCover, token, translation, characteristics);
     if(isSuccess) {
+      await Get.find<ProfileController>().getProfile();
       Get.back();
-      Get.find<ProfileController>().getProfile();
       showCustomSnackBar('restaurant_settings_updated_successfully'.tr, isError: false);
     }
     _isLoading = false;
@@ -456,7 +491,7 @@ class RestaurantController extends GetxController implements GetxService {
     if(isSuccess) {
       Get.offAllNamed(RouteHelper.getInitialRoute());
       showCustomSnackBar(isAdd ? 'product_added_successfully'.tr : 'product_updated_successfully'.tr, isError: false);
-      getProductList('1', 'all');
+      getProductList(offset: '1', foodType: 'all', stockType: 'all');
     }
     _isLoading = false;
     update();
@@ -469,7 +504,7 @@ class RestaurantController extends GetxController implements GetxService {
     if(isSuccess) {
       Get.back();
       showCustomSnackBar('product_deleted_successfully'.tr, isError: false);
-      await getProductList('1', 'all');
+      await getProductList(offset: '1', foodType: 'all', stockType: 'all');
     }
     _isLoading = false;
     update();
@@ -519,7 +554,7 @@ class RestaurantController extends GetxController implements GetxService {
   void toggleAvailable(int? productID) async {
     bool isSuccess = await restaurantServiceInterface.updateProductStatus(productID, _isAvailable ? 0 : 1);
     if(isSuccess) {
-      getProductList('1', 'all');
+      getProductList(offset: '1', foodType: 'all', stockType: 'all');
       _isAvailable = !_isAvailable;
       showCustomSnackBar('food_status_updated_successfully'.tr, isError: false);
     }
@@ -533,7 +568,7 @@ class RestaurantController extends GetxController implements GetxService {
   void toggleRecommendedProduct(int? productID) async {
     bool isSuccess = await restaurantServiceInterface.updateRecommendedProductStatus(productID, _isRecommended ? 0 : 1);
     if(isSuccess) {
-      getProductList('1', 'all');
+      getProductList(offset: '1', foodType: 'all', stockType: 'all');
       _isRecommended = !_isRecommended;
       showCustomSnackBar('food_status_updated_successfully'.tr, isError: false);
     }
@@ -762,7 +797,7 @@ class RestaurantController extends GetxController implements GetxService {
     update();
     bool isSuccess = await restaurantServiceInterface.updateProductStock(foodId, itemStock, product, variationStock);
     if(isSuccess) {
-      await getProductList('1', 'all');
+      await getProductList(offset: '1', foodType: 'all', stockType: 'all');
       Get.back();
       Get.back();
       showCustomSnackBar('stock_updated_successfully'.tr, isError: false);
@@ -780,6 +815,5 @@ class RestaurantController extends GetxController implements GetxService {
     _isFabVisible = false;
     update();
   }
-
 
 }

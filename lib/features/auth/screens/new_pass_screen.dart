@@ -161,7 +161,7 @@ class _NewPassScreenState extends State<NewPassScreen> {
         Get.find<ForgotPasswordController>().changePassword(user, password).then((value) {
           if (value) {
             showDialog(
-              context: context,
+              context: Get.context!,
               builder: (context) => Dialog(
                 child: Container(
                   width: context.width * 0.9,

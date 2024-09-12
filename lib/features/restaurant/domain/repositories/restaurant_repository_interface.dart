@@ -4,7 +4,7 @@ import 'package:stackfood_multivendor_restaurant/interface/repository_interface.
 import 'package:image_picker/image_picker.dart';
 
 abstract class RestaurantRepositoryInterface implements RepositoryInterface{
-  Future<dynamic> getProductList(String offset, String type, int? categoryId);
+  Future<dynamic> getProductList(String offset, String type, String stockType, int? categoryId);
   Future<dynamic> updateRestaurant(Restaurant restaurant, List<String> cuisines, XFile? logo, XFile? cover, String token, List<Translation> translation, String characteristics);
   Future<dynamic> addProduct(Product product, XFile? image, bool isAdd, String tags, List<int> deletedVariationIds, List<int> deletedVariationOptionIds);
   Future<dynamic> getRestaurantReviewList(int? restaurantID, String? searchText);

@@ -36,8 +36,8 @@ class DeliveryManSearchDialogWidget extends StatelessWidget {
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(Dimensions.radiusDefault)),
           child: SizedBox(width: Dimensions.webMaxWidth, child: Stack(children: [
 
-            TypeAheadField(
-              textFieldConfiguration: TextFieldConfiguration(
+            TypeAheadField<DeliveryManListModel>(
+              builder: (context, controller, focusNode) => TextField(
                 controller: controller,
                 textInputAction: TextInputAction.search,
                 autofocus: false,
@@ -77,7 +77,7 @@ class DeliveryManSearchDialogWidget extends StatelessWidget {
                   ]),
                 );
               },
-              onSuggestionSelected: (DeliveryManListModel suggestion) async {
+              onSelected: (DeliveryManListModel suggestion) async {
                 deliveryManController.selectDeliveryManInMap(suggestion);
                 LatLng latLng = LatLng(double.parse(suggestion.lat!), double.parse(suggestion.lng!));
                 if(mapController != null) {

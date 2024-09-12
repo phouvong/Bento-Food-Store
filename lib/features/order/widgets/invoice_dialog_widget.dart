@@ -83,7 +83,7 @@ class InvoiceDialogWidget extends StatelessWidget {
               Divider(color: Theme.of(context).textTheme.bodyLarge!.color, thickness: 1),
 
               Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                Text('${order!.customer!.fName} ${order!.customer!.lName}', style: robotoRegular.copyWith(fontSize: fontSize)),
+                Text('${order!.customer?.fName ?? 'guest'.tr} ${order!.customer?.lName ?? 'user'.tr}', style: robotoRegular.copyWith(fontSize: fontSize)),
                 Text(order!.deliveryAddress?.address ?? '', style: robotoRegular.copyWith(fontSize: fontSize)),
                 Text(order!.deliveryAddress?.contactPersonNumber ?? '', style: robotoRegular.copyWith(fontSize: fontSize)),
               ]),

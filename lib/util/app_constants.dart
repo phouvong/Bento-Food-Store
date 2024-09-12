@@ -2,11 +2,8 @@ import 'package:stackfood_multivendor_restaurant/features/language/domain/models
 import 'package:stackfood_multivendor_restaurant/util/images.dart';
 
 class AppConstants {
-  static const String appName = 'Bento Store';
-  static const double appVersion = 7.7;
-
-  static const double limitOfPickedVideoSizeInMB = 50;
-  static const double maxSizeOfASingleFile = 10;
+  static const String appName = 'bento store';
+  static const double appVersion = 7.8;
 
   static const String baseUrl = 'https://food.naplao.com';
   static const String configUri = '/api/v1/config';
@@ -100,6 +97,7 @@ class AppConstants {
   static const String updateReplyUri = '/api/v1/vendor/product/reply-update';
   static const String getCharacteristicSuggestion = '/api/v1/vendor/get-characteristic-suggestion';
   static const String productUpdateStock = '/api/v1/vendor/product/update-stock';
+  static const String getTransactionStatement = '/api/v1/vendor/generate-transaction-statement';
 
   ///Chatting
   static const String getConversationListUri = '/api/v1/vendor/message/list';
@@ -137,6 +135,7 @@ class AppConstants {
   static const String zoneTopic = 'zone_topic';
   static const String localizationKey = 'X-localization';
   static const String bluetoothMacAddress = 'bluetooth_mac_address';
+  static const String maintenanceModeTopic = 'maintenance_mode_restaurant_app';
 
   static List<LanguageModel> languages = [
     LanguageModel(imageUrl: Images.lao, languageName: 'ພາສາລາວ', countryCode: 'LA', languageCode: 'lo'),
@@ -145,4 +144,10 @@ class AppConstants {
     //LanguageModel(imageUrl: Images.spanish, languageName: 'Spanish', countryCode: 'ES', languageCode: 'es'),
     //LanguageModel(imageUrl: Images.bengali, languageName: 'Bengali', countryCode: 'BN', languageCode: 'bn'),
   ];
+
+  static const double maxLimitOfFileSentINConversation = 25;
+  static const double maxLimitOfTotalFileSent = 5;
+  static const double maxSizeOfASingleFile = 10;
+  static const double maxImageSend = 10;
+  static const double limitOfPickedVideoSizeInMB = 50;
 }

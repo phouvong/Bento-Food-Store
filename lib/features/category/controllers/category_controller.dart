@@ -112,7 +112,7 @@ class CategoryController extends GetxController implements GetxService {
   void setCategory(int index) {
     _categoryIndex0 = index;
     Get.find<RestaurantController>().productList == null;
-    Get.find<RestaurantController>().getProductList('1', Get.find<RestaurantController>().type, categoryId: _categoryIndex0 != 0 ? _categoryList![index].id : 0);
+    Get.find<RestaurantController>().getProductList(offset: '1', foodType: Get.find<RestaurantController>().selectedFoodType, stockType: Get.find<RestaurantController>().selectedStockType, categoryId: _categoryIndex0 != 0 ? _categoryList![index].id : 0);
     update();
   }
 

@@ -31,9 +31,13 @@ class _PdfGenerateDialogState extends State<PdfGenerateDialog> {
       width: MediaQuery.of(context).size.width * 0.9,
       child: Column(mainAxisSize: MainAxisSize.min, children: [
 
-        InvoiceDialogWidget(
-          order: widget.order, orderDetails: widget.orderDetails,
-          screenshotController: screenshotController,
+        Expanded(
+          child: SingleChildScrollView(
+            child: InvoiceDialogWidget(
+              order: widget.order, orderDetails: widget.orderDetails,
+              screenshotController: screenshotController,
+            ),
+          ),
         ),
 
         Padding(

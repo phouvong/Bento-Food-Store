@@ -109,7 +109,7 @@ class _RestaurantRegistrationScreenState extends State<RestaurantRegistrationScr
 
           return PopScope(
             canPop: false,
-            onPopInvoked: (didPop) async{
+            onPopInvokedWithResult: (didPop, result) async{
               if(_canBack) {
                 return;
               }else {

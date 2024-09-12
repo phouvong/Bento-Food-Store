@@ -154,7 +154,7 @@ class _MapViewScreenState extends State<MapViewScreen> {
           onTap: () {
             _customInfoWindowController.addInfoWindow!(MapCustomInfoWindowWidget(image: '${deliveryManList[i].imageFullUrl}'), latLng);
           },
-          icon: BitmapDescriptor.fromBytes(carMarkerIcon),
+          icon: BitmapDescriptor.bytes(carMarkerIcon),
         ));
 
       }

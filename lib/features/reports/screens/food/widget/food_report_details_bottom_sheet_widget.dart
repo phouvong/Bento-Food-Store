@@ -34,28 +34,40 @@ class FoodOrderDetailsBottomSheetWidget extends StatelessWidget {
                 borderRadius: BorderRadius.circular(Dimensions.radiusSmall),
               ),
             ),
-            const SizedBox(height: Dimensions.paddingSizeDefault),
 
-            Column(children: [
-              Text('transaction_details'.tr, style: robotoBold.copyWith(fontSize: Dimensions.fontSizeLarge, color: Theme.of(context).textTheme.bodyLarge!.color?.withOpacity(0.6))),
-              const SizedBox(height: Dimensions.paddingSizeDefault),
+            Padding(
+              padding: const EdgeInsets.all(Dimensions.paddingSizeLarge),
+              child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
 
-              SizedBox(width: context.width * 0.8, child: Text(foods.name.toString(), maxLines: 1, overflow: TextOverflow.ellipsis, textAlign: TextAlign.center, style: robotoBold.copyWith(fontSize: Dimensions.fontSizeLarge))),
-              const SizedBox(height: Dimensions.paddingSizeSmall),
+                Expanded(
+                  child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                    Text('item_details'.tr, style: robotoBold.copyWith(fontSize: Dimensions.fontSizeLarge, color: Theme.of(context).textTheme.bodyLarge!.color?.withOpacity(0.6))),
+                    const SizedBox(height: Dimensions.paddingSizeDefault),
 
-              Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-                Text('${'average_ratings'.tr} - ', style: robotoMedium.copyWith(fontSize: Dimensions.fontSizeLarge)),
+                    SizedBox(width: context.width * 0.8, child: Text(foods.name.toString(), maxLines: 1, overflow: TextOverflow.ellipsis, textAlign: TextAlign.start, style: robotoBold.copyWith(fontSize: Dimensions.fontSizeLarge))),
+                    const SizedBox(height: Dimensions.paddingSizeSmall),
 
-                const Icon(Icons.star, color: Colors.blue, size: 15),
+                    Row(mainAxisAlignment: MainAxisAlignment.start, children: [
+                      Text('${'average_ratings'.tr} - ', style: robotoMedium.copyWith(fontSize: Dimensions.fontSizeLarge)),
 
-                Text('${foods.averageRatings!.toStringAsFixed(1)}' ' ', style: robotoRegular.copyWith(color: Colors.blue)),
+                      Icon(Icons.star_rounded, color: Theme.of(context).primaryColor, size: 18),
 
-                Text('(${foods.totalRatingsGiven})', style: robotoRegular),
+                      Text('${foods.averageRatings!.toStringAsFixed(1)}' ' ', style: robotoBold.copyWith(color: Theme.of(context).primaryColor, fontSize: Dimensions.fontSizeLarge)),
+
+                    ]),
+                  ]),
+                ),
+                const SizedBox(width: Dimensions.paddingSizeLarge),
+
+                /*ExportButton(
+                  onTap: () {
+
+                  },
+                ),*/
+
 
               ]),
-
-            ]),
-            const SizedBox(height: Dimensions.paddingSizeDefault),
+            ),
 
           ]),
         ),

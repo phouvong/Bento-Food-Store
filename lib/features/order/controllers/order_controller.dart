@@ -47,7 +47,7 @@ class OrderController extends GetxController implements GetxService {
   int _historyIndex = 0;
   int get historyIndex => _historyIndex;
 
-  final List<String> _statusList = ['all', 'delivered', 'refunded'];
+  final List<String> _statusList = ['all', 'delivered', 'refunded', 'canceled', 'failed'];
   List<String> get statusList => _statusList;
 
   bool _paginate = false;
@@ -275,7 +275,7 @@ class OrderController extends GetxController implements GetxService {
           || order.orderType == 'take_away' || Get.find<ProfileController>().profileModel!.restaurants![0].selfDeliverySystem == 1)
           && (_campaignOnly ? order.foodCampaign == 1 :  order.subscriptionId == null)) {
         _runningOrders![0].orderList.add(order);
-      }else if((order.orderStatus == 'confirmed' || (order.orderStatus == 'accepted' && order.confirmed != null))
+      }else if((order.orderStatus == 'confirmed' || (order.orderStatus == 'accepted' && (order.confirmed != null || order.accepted != null)))
           && (_campaignOnly ? order.foodCampaign == 1 : order.subscriptionId == null)) {
         _runningOrders![1].orderList.add(order);
       }else if(order.orderStatus == 'processing' && (_campaignOnly ? order.foodCampaign == 1 : order.subscriptionId == null)) {

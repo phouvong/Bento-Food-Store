@@ -37,7 +37,7 @@ class LocalizationController extends GetxController implements GetxService {
     }
 
     if(Get.find<AuthController>().isLoggedIn() && !fromBottomSheet){
-      Get.find<RestaurantController>().getProductList('1', 'all');
+      Get.find<RestaurantController>().getProductList(offset: '1', foodType: 'all', stockType: 'all');
       Get.find<ProfileController>().getProfile();
     }
     update();

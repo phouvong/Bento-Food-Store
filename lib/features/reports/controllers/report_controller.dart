@@ -1,8 +1,15 @@
+import 'dart:io';
+import 'package:http/http.dart' as http;
+import 'package:permission_handler/permission_handler.dart';
+import 'package:stackfood_multivendor_restaurant/common/widgets/custom_snackbar_widget.dart';
 import 'package:stackfood_multivendor_restaurant/features/reports/domain/services/report_service_interface.dart';
 import 'package:stackfood_multivendor_restaurant/features/reports/domain/models/report_model.dart';
+import 'package:stackfood_multivendor_restaurant/features/splash/controllers/splash_controller.dart';
 import 'package:stackfood_multivendor_restaurant/helper/date_converter_helper.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:stackfood_multivendor_restaurant/helper/pdf_download_helper.dart';
+import 'package:stackfood_multivendor_restaurant/util/app_constants.dart';
 
 class ReportController extends GetxController implements GetxService {
   final ReportServiceInterface reportServiceInterface;
@@ -213,6 +220,20 @@ class ReportController extends GetxController implements GetxService {
     update();
   }
 
+  Future<void> getTransactionReportStatement(int orderId) async {
+    _isLoading = true;
+    update();
+
+    Response response = await reportServiceInterface.getTransactionReportStatement(orderId: orderId);
+    if (response.statusCode == 200) {
+      downloadPdf(response.body['file_url'], orderId);
+    } else {
+      showCustomSnackBar('download_failed'.tr);
+    }
+    _isLoading = false;
+    update();
+  }
+
   void showDatePicker(BuildContext context, {bool transaction = false, bool order = false, bool campaign = false}) async {
     final DateTimeRange? result = await showDateRangePicker(
       context: context,
@@ -243,6 +264,37 @@ class ReportController extends GetxController implements GetxService {
         getCampaignReportList(offset: '1', from: _from, to: _to);
       }
       getFoodReportList(offset: '1', from: _from, to: _to);
+    }
+  }
+
+  Future<void> downloadPdf(String url, int orderId) async {
+    try {
+      // Request storage permission
+      var status = await Permission.storage.request();
+
+      if (status.isGranted) {
+        var response = await http.get(Uri.parse(url));
+
+        if (response.statusCode == 200) {
+          Directory directory = await PdfDownloadHelper.getProjectDirectory(Get.find<SplashController>().configModel?.businessName ?? AppConstants.appName);
+          String fileName = 'Report $orderId.pdf';
+          String filePath = '${directory.path}/$fileName';
+
+          // Write the file to the directory
+          File file = File(filePath);
+          await file.writeAsBytes(response.bodyBytes);
+
+          String relativePath = file.path.replaceAll('/storage/emulated/0/', '');
+
+          showCustomSnackBar('${'download_complete_file_saved_at'.tr} $relativePath', isError: false);
+        } else {
+          showCustomSnackBar('download_failed'.tr);
+        }
+      } else if (status.isDenied || status.isPermanentlyDenied) {
+        showCustomSnackBar('permission_denied_cannot_download_the_file'.tr);
+      }
+    } catch (e) {
+      showCustomSnackBar('download_failed'.tr);
     }
   }
 

@@ -52,7 +52,7 @@ class _BusinessPlanScreenState extends State<BusinessPlanScreen> {
     return GetBuilder<BusinessController>(builder: (businessController) {
       return PopScope(
         canPop: false,
-        onPopInvoked: (didPop) async{
+        onPopInvokedWithResult: (didPop, result) async{
           if(_canBack) {
             return;
           }else {

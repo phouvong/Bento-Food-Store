@@ -150,7 +150,7 @@ class ProductWidget extends StatelessWidget {
 
                 DiscountTagWidget(
                   discount: discount, discountType: discountType,
-                  freeDelivery: true,
+                  freeDelivery: false,
                 ),
 
                 isAvailable ? const SizedBox() : const NotAvailableWidget(isRestaurant: false),

@@ -21,18 +21,22 @@ class MessageCardWidget extends StatelessWidget {
     return CustomInkWellWidget(
       onTap: onTap!,
       highlightColor: Theme.of(context).colorScheme.surface.withOpacity(0.1),
-      radius: Dimensions.radiusSmall,
+      radius: Dimensions.radiusSmall + 3,
       child: Container(
         padding: const EdgeInsets.all(Dimensions.paddingSizeSmall),
         decoration: BoxDecoration(
           color: isUnread ? Theme.of(context).primaryColor.withOpacity(0.05) : Theme.of(context).cardColor,
-          borderRadius: BorderRadius.circular(Dimensions.radiusSmall),
-          boxShadow: [BoxShadow(color: Theme.of(context).hintColor.withOpacity(0.05), blurRadius: 5, spreadRadius: 1)],
+          borderRadius: BorderRadius.circular(Dimensions.radiusSmall + 3),
+          boxShadow: [BoxShadow(color: isUnread ? Theme.of(context).hintColor.withOpacity(0.05) : Colors.black12, blurRadius: 5, spreadRadius: 0)],
         ),
         child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
 
           ClipOval(
-            child: CustomImageWidget(height: 50, width: 50, image: userTypeImage),
+            child: CustomImageWidget(
+              height: 50, width: 50,
+              image: userTypeImage,
+              fit: BoxFit.cover,
+            ),
           ),
           const SizedBox(width: Dimensions.paddingSizeSmall),
 

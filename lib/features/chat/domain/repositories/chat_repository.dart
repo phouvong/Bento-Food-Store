@@ -34,7 +34,7 @@ class ChatRepository implements ChatRepositoryInterface {
   @override
   Future<Response> getMessages(int offset, int? userId, UserType userType, int? conversationID) async {
     return await apiClient.getData('${AppConstants.getMessageListUri}?offset=$offset&limit=10&${conversationID != null ?
-    'conversation_id' : userType == UserType.delivery_man ? 'delivery_man_id' : 'user_id'}=${conversationID ?? userId}');
+    'conversation_id' : userType == UserType.admin ? 'admin_id' : userType == UserType.delivery_man ? 'delivery_man_id' : 'user_id'}=${conversationID ?? userId}');
   }
 
   @override
@@ -48,31 +48,26 @@ class ChatRepository implements ChatRepositoryInterface {
 
   @override
   Future add(value) {
-    // TODO: implement add
     throw UnimplementedError();
   }
 
   @override
   Future delete({int? id}) {
-    // TODO: implement delete
     throw UnimplementedError();
   }
 
   @override
   Future get(int id) {
-    // TODO: implement get
     throw UnimplementedError();
   }
 
   @override
   Future getList() {
-    // TODO: implement getList
     throw UnimplementedError();
   }
 
   @override
   Future update(Map<String, dynamic> body) {
-    // TODO: implement update
     throw UnimplementedError();
   }
 

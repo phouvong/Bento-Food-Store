@@ -1,6 +1,6 @@
 class ConfigModel {
   String? businessName;
-  String? logo;
+  String? logoFullUrl;
   String? address;
   String? phone;
   String? email;
@@ -29,8 +29,8 @@ class ConfigModel {
   bool? toggleDmRegistration;
   bool? toggleRestaurantRegistration;
   bool? maintenanceMode;
-  String? appUrlAndroid;
-  String? appUrlIos;
+  String? appUrlAndroidRestaurant;
+  String? appUrlIosRestaurant;
   List<Language>? language;
   int? scheduleOrderSlotDuration;
   int? digitAfterDecimalPoint;
@@ -50,11 +50,13 @@ class ConfigModel {
   double? minAmountToPayRestaurant;
   bool? restaurantReviewReply;
   bool? extraPackagingChargeStatus;
-  String? favIcon;
+  String? favIconFullUrl;
+  int? taxIncluded;
+  MaintenanceModeData? maintenanceModeData;
 
   ConfigModel({
     this.businessName,
-    this.logo,
+    this.logoFullUrl,
     this.address,
     this.phone,
     this.email,
@@ -83,8 +85,8 @@ class ConfigModel {
     this.toggleDmRegistration,
     this.toggleRestaurantRegistration,
     this.maintenanceMode,
-    this.appUrlAndroid,
-    this.appUrlIos,
+    this.appUrlAndroidRestaurant,
+    this.appUrlIosRestaurant,
     this.language,
     this.scheduleOrderSlotDuration,
     this.digitAfterDecimalPoint,
@@ -104,12 +106,14 @@ class ConfigModel {
     this.minAmountToPayRestaurant,
     this.restaurantReviewReply,
     this.extraPackagingChargeStatus,
-    this.favIcon,
+    this.favIconFullUrl,
+    this.taxIncluded,
+    this.maintenanceModeData,
   });
 
   ConfigModel.fromJson(Map<String, dynamic> json) {
     businessName = json['business_name'];
-    logo = json['logo'];
+    logoFullUrl = json['logo_full_url'];
     address = json['address'];
     phone = json['phone'];
     email = json['email'];
@@ -138,8 +142,8 @@ class ConfigModel {
     toggleDmRegistration = json['toggle_dm_registration'];
     toggleRestaurantRegistration = json['toggle_restaurant_registration'];
     maintenanceMode = json['maintenance_mode'];
-    appUrlAndroid = json['app_url_android_restaurant'];
-    appUrlIos = json['app_url_ios_restaurant'];
+    appUrlAndroidRestaurant = json['app_url_android_restaurant'];
+    appUrlIosRestaurant = json['app_url_ios_restaurant'];
     if (json['language'] != null) {
       language = [];
       json['language'].forEach((v) {
@@ -169,13 +173,15 @@ class ConfigModel {
     minAmountToPayRestaurant = json['min_amount_to_pay_restaurant']?.toDouble();
     restaurantReviewReply = json['restaurant_review_reply'];
     extraPackagingChargeStatus = json['extra_packaging_charge'];
-    favIcon = json['fav_icon'];
+    favIconFullUrl = json['fav_icon_full_url'];
+    taxIncluded = json['tax_included'];
+    maintenanceModeData = json['maintenance_mode_data'] != null ? MaintenanceModeData.fromJson(json['maintenance_mode_data']) : null;
   }
 
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = <String, dynamic>{};
     data['business_name'] = businessName;
-    data['logo'] = logo;
+    data['logo_full_url'] = logoFullUrl;
     data['address'] = address;
     data['phone'] = phone;
     data['email'] = email;
@@ -206,8 +212,8 @@ class ConfigModel {
     data['toggle_dm_registration'] = toggleDmRegistration;
     data['toggle_restaurant_registration'] = toggleRestaurantRegistration;
     data['maintenance_mode'] = maintenanceMode;
-    data['app_url_android'] = appUrlAndroid;
-    data['app_url_ios'] = appUrlIos;
+    data['app_url_android_restaurant'] = appUrlAndroidRestaurant;
+    data['app_url_ios_restaurant'] = appUrlIosRestaurant;
     if (language != null) {
       data['language'] = language!.map((v) => v.toJson()).toList();
     }
@@ -229,7 +235,11 @@ class ConfigModel {
     data['min_amount_to_pay_restaurant'] = minAmountToPayRestaurant;
     data['restaurant_review_reply'] = restaurantReviewReply;
     data['extra_packaging_charge'] = extraPackagingChargeStatus;
-    data['fav_icon'] = favIcon;
+    data['fav_icon_full_url'] = favIconFullUrl;
+    data['tax_included'] = taxIncluded;
+    if (maintenanceModeData != null) {
+      data['maintenance_mode_data'] = maintenanceModeData!.toJson();
+    }
     return data;
   }
 }
@@ -358,7 +368,7 @@ class Data {
     inputData = json['input_data'];
     // checkData = json['check_data'].cast<String>();
 
-    if(json['check_data'] != null) {
+    if (json['check_data'] != null) {
       checkData = [];
       json['check_data'].forEach((e) => checkData!.add(e));
     }
@@ -402,6 +412,87 @@ class MediaData {
     data['image'] = image;
     data['pdf'] = pdf;
     data['docs'] = docs;
+    return data;
+  }
+}
+
+class MaintenanceModeData {
+  List<String>? maintenanceSystemSetup;
+  MaintenanceDurationSetup? maintenanceDurationSetup;
+  MaintenanceMessageSetup? maintenanceMessageSetup;
+
+  MaintenanceModeData({
+    this.maintenanceSystemSetup,
+    this.maintenanceDurationSetup,
+    this.maintenanceMessageSetup,
+  });
+
+  MaintenanceModeData.fromJson(Map<String, dynamic> json) {
+    maintenanceSystemSetup = json['maintenance_system_setup'].cast<String>();
+    maintenanceDurationSetup = json['maintenance_duration_setup'] != null ? MaintenanceDurationSetup.fromJson(json['maintenance_duration_setup']) : null;
+    maintenanceMessageSetup = json['maintenance_message_setup'] != null ? MaintenanceMessageSetup.fromJson(json['maintenance_message_setup']) : null;
+  }
+
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> data = <String, dynamic>{};
+    data['maintenance_system_setup'] = maintenanceSystemSetup;
+    if (maintenanceDurationSetup != null) {
+      data['maintenance_duration_setup'] = maintenanceDurationSetup!.toJson();
+    }
+    if (maintenanceMessageSetup != null) {
+      data['maintenance_message_setup'] = maintenanceMessageSetup!.toJson();
+    }
+    return data;
+  }
+}
+
+class MaintenanceDurationSetup {
+  String? maintenanceDuration;
+  String? startDate;
+  String? endDate;
+
+  MaintenanceDurationSetup({
+    this.maintenanceDuration,
+    this.startDate,
+    this.endDate,
+  });
+
+  MaintenanceDurationSetup.fromJson(Map<String, dynamic> json) {
+    maintenanceDuration = json['maintenance_duration'];
+    startDate = json['start_date'];
+    endDate = json['end_date'];
+  }
+
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> data = <String, dynamic>{};
+    data['maintenance_duration'] = maintenanceDuration;
+    data['start_date'] = startDate;
+    data['end_date'] = endDate;
+    return data;
+  }
+}
+
+class MaintenanceMessageSetup {
+  int? businessNumber;
+  int? businessEmail;
+  String? maintenanceMessage;
+  String? messageBody;
+
+  MaintenanceMessageSetup({this.businessNumber, this.businessEmail, this.maintenanceMessage, this.messageBody});
+
+  MaintenanceMessageSetup.fromJson(Map<String, dynamic> json) {
+    businessNumber = json['business_number'];
+    businessEmail = json['business_email'];
+    maintenanceMessage = json['maintenance_message'];
+    messageBody = json['message_body'];
+  }
+
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> data = <String, dynamic>{};
+    data['business_number'] = businessNumber;
+    data['business_email'] = businessEmail;
+    data['maintenance_message'] = maintenanceMessage;
+    data['message_body'] = messageBody;
     return data;
   }
 }

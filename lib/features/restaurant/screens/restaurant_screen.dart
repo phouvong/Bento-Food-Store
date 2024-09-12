@@ -1,8 +1,9 @@
+import 'package:stackfood_multivendor_restaurant/common/widgets/custom_bottom_sheet_widget.dart';
 import 'package:stackfood_multivendor_restaurant/common/widgets/custom_image_widget.dart';
 import 'package:stackfood_multivendor_restaurant/common/widgets/custom_snackbar_widget.dart';
 import 'package:stackfood_multivendor_restaurant/features/profile/controllers/profile_controller.dart';
 import 'package:stackfood_multivendor_restaurant/features/restaurant/controllers/restaurant_controller.dart';
-import 'package:stackfood_multivendor_restaurant/features/restaurant/widgets/veg_filter_widget.dart';
+import 'package:stackfood_multivendor_restaurant/features/restaurant/widgets/filter_data_bottom_sheet.dart';
 import 'package:stackfood_multivendor_restaurant/features/profile/domain/models/profile_model.dart';
 import 'package:stackfood_multivendor_restaurant/features/restaurant/widgets/product_view_widget.dart';
 import 'package:stackfood_multivendor_restaurant/helper/price_converter_helper.dart';
@@ -34,7 +35,7 @@ class _RestaurantScreenState extends State<RestaurantScreen> with TickerProvider
     _tabController!.addListener(() {
       Get.find<RestaurantController>().setTabIndex(_tabController!.index);
     });
-    Get.find<RestaurantController>().getProductList('1', 'all');
+    Get.find<RestaurantController>().getProductList(offset: '1', foodType: 'all', stockType: 'all', categoryId: 0);
     Get.find<RestaurantController>().getRestaurantReviewList(Get.find<ProfileController>().profileModel!.restaurants![0].id, '');
     Get.find<RestaurantController>().getRestaurantCategories();
 
@@ -114,30 +115,7 @@ class _RestaurantScreenState extends State<RestaurantScreen> with TickerProvider
                 expandedHeight: 230, toolbarHeight: 50,
                 pinned: true, floating: false,
                 surfaceTintColor: Theme.of(context).cardColor,
-                //backgroundColor: Theme.of(context).primaryColor,
 
-                /*leading: Container(
-                    margin: const EdgeInsets.all(Dimensions.paddingSizeExtraSmall),
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: Theme.of(context).primaryColor.withOpacity(0.15),
-                      border: Border.all(color: Theme.of(context).cardColor, width: 1),
-                    ),
-                    child: IconButton(
-                      icon: const Icon(Icons.arrow_back_ios_new, color: Colors.white),
-                      onPressed: () => Get.back(),
-                    ),
-                  ),*/
-
-                /*actions: [IconButton(
-                    icon: Container(
-                      height: 50, width: 50, alignment: Alignment.center,
-                      padding: const EdgeInsets.all(7),
-                      decoration: BoxDecoration(color: Theme.of(context).primaryColor, borderRadius: BorderRadius.circular(Dimensions.radiusSmall)),
-                      child: Image.asset(Images.edit),
-                    ),
-                    onPressed: () => Get.toNamed(RouteHelper.getRestaurantSettingsRoute(restaurant)),
-                  )],*/
                 flexibleSpace: FlexibleSpaceBar(
                   background: Stack(clipBehavior: Clip.none, children: [
                     ClipRRect(
@@ -290,9 +268,25 @@ class _RestaurantScreenState extends State<RestaurantScreen> with TickerProvider
 
                           Text('all_foods'.tr, style: robotoMedium.copyWith(fontWeight: FontWeight.w600)),
 
-                          VegFilterWidget(type: restController.type, onSelected: (String type) {
-                            Get.find<RestaurantController>().getProductList('1', type);
-                          }),
+                          /*VegFilterWidget(type: restController.type, onSelected: (String type) {
+                            Get.find<RestaurantController>().getProductList('1', type, categoryId: restController.categoryId);
+                          }),*/
+                          const SizedBox(width: 20),
+
+                          InkWell(
+                            onTap: () {
+                              showCustomBottomSheet(child: const FilterDataBottomSheet());
+                            },
+                            child: Container(
+                              padding: const EdgeInsets.all(Dimensions.paddingSizeExtraSmall),
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(Dimensions.radiusDefault - 2),
+                                color: Theme.of(context).primaryColor.withOpacity(0.1),
+                                border: Border.all(color: Theme.of(context).primaryColor),
+                              ),
+                              child: Icon(Icons.tune, color: Theme.of(context).primaryColor),
+                            ),
+                          ),
 
                         ]),
                       ),
@@ -307,7 +301,7 @@ class _RestaurantScreenState extends State<RestaurantScreen> with TickerProvider
                           physics: const BouncingScrollPhysics(),
                           itemBuilder: (context, index) {
                             return InkWell(
-                              onTap: () => restController.setCategory(index, restController.categoryNameList![index]),
+                              onTap: () => restController.setCategory(index: index, foodType: 'all', stockType: 'all'),
                               child: Container(
                                 padding: const EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeSmall,
                                     vertical: Dimensions.paddingSizeExtraSmall),
@@ -362,8 +356,8 @@ class _RestaurantScreenState extends State<RestaurantScreen> with TickerProvider
               ),
 
               SliverToBoxAdapter(
-                child: ProductViewWidget(scrollController: _scrollController, type: restController.type, onVegFilterTap: (String type) {
-                  Get.find<RestaurantController>().getProductList('1', type);
+                child: ProductViewWidget(scrollController: _scrollController, type: restController.selectedFoodType, onVegFilterTap: (String type) {
+                  Get.find<RestaurantController>().getProductList(offset: '1', foodType: type, stockType: restController.selectedStockType, categoryId: restController.categoryId);
                 }),
               ),
 

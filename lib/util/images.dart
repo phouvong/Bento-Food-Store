@@ -100,6 +100,7 @@ class Images {
   static const String addonDeleteWarningIcon = 'assets/image/addon_delete_warning_icon.png';
   static const String accountDeleteWarningIcon = 'assets/image/account_delete_warning_icon.png';
   static const String accountDeleteIcon = 'assets/image/account_delect_icon.png';
+  static const String fileIcon = 'assets/image/file.png';
 
   static String get adsRoundShape => 'assets/image/ads_round_shape.svg';
   static String get adsCurveShape => 'assets/image/ads_curve_shape.svg';
@@ -123,4 +124,6 @@ class Images {
   static const String calender = 'assets/image/calender.svg';
   static const String adsType = 'assets/image/ads_type.svg';
   static const String adsSuccess = 'assets/image/ads_success.svg';
+  static const String attachment = 'assets/image/attachment.svg';
+  static const String sendIcon = 'assets/image/send.svg';
 }

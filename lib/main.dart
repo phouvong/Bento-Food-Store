@@ -32,7 +32,7 @@ Future<void> main() async {
       await Firebase.initializeApp(
         options: const FirebaseOptions(
           apiKey: 'AIzaSyCHZCBLcVJf2NqZYsd37TzUxqzVcDI-2JU',
-          appId: '1:299589180044:web:b575785f8db4c9d93f79a9',
+          appId: '1:299589180044:android:83a677068c3d76023f79a9',
           messagingSenderId: '299589180044',
           projectId: 'bento-food',
         ),
@@ -68,7 +68,7 @@ class MyApp extends StatelessWidget {
       statusBarColor: Colors.transparent,
       statusBarIconBrightness: Brightness.dark,
       statusBarBrightness: Brightness.dark,
-      systemNavigationBarColor: Colors.transparent,
+      systemNavigationBarColor: Colors.black,
       systemNavigationBarIconBrightness: Brightness.dark,
     ));
 

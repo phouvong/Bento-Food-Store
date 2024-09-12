@@ -2,7 +2,6 @@ import 'package:stackfood_multivendor_restaurant/common/widgets/confirmation_dia
 import 'package:stackfood_multivendor_restaurant/common/widgets/custom_image_widget.dart';
 import 'package:stackfood_multivendor_restaurant/features/campaign/controllers/campaign_controller.dart';
 import 'package:stackfood_multivendor_restaurant/features/campaign/domain/models/campaign_model.dart';
-import 'package:stackfood_multivendor_restaurant/features/campaign/screens/campaign_details_screen.dart';
 import 'package:stackfood_multivendor_restaurant/helper/date_converter_helper.dart';
 import 'package:stackfood_multivendor_restaurant/helper/route_helper.dart';
 import 'package:stackfood_multivendor_restaurant/util/dimensions.dart';
@@ -19,8 +18,7 @@ class CampaignWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return InkWell(
       onTap: () => Get.toNamed(
-        RouteHelper.getCampaignDetailsRoute(campaignModel.id),
-        arguments: CampaignDetailsScreen(campaignModel: campaignModel),
+        RouteHelper.getCampaignDetailsRoute(id: campaignModel.id),
       ),
       child: Container(
         margin: const EdgeInsets.only(bottom: Dimensions.paddingSizeSmall),

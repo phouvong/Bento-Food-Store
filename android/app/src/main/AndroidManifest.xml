@@ -31,7 +31,7 @@
     </queries>
 
     <application
-        android:label="Bento Store"
+        android:label="bento store"
         android:name="${applicationName}"
         android:requestLegacyExternalStorage="true"
         android:usesCleartextTraffic="true"

@@ -14,16 +14,14 @@ class LocationSearchDialogWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
 
-    final TextEditingController controller = TextEditingController();
-
     return Container(
       margin: const EdgeInsets.only(top:  0),
       padding: const EdgeInsets.all(Dimensions.paddingSizeSmall),
       alignment: Alignment.topCenter,
       child: Material(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(Dimensions.radiusSmall)),
-        child: SizedBox(width: context.width, child: TypeAheadField(
-          textFieldConfiguration: TextFieldConfiguration(
+        child: SizedBox(width: context.width, child: TypeAheadField<PredictionModel>(
+          builder: (context, controller, focusNode) => TextField(
             controller: controller,
             textInputAction: TextInputAction.search,
             autofocus: true,
@@ -63,7 +61,7 @@ class LocationSearchDialogWidget extends StatelessWidget {
               ]),
             );
           },
-          onSuggestionSelected: (PredictionModel suggestion) async {
+          onSelected: (PredictionModel suggestion) async {
             Position position = await Get.find<LocationController>().setSuggestedLocation(suggestion.placeId, suggestion.description, mapController);
             Get.back(result: position);
           },

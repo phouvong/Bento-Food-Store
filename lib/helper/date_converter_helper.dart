@@ -146,7 +146,7 @@ class DateConverter {
   }
 
   static String localDateToIsoStringAM(DateTime dateTime) {
-    return DateFormat('dd MMM, yyyy, HH:mm a').format(dateTime.toLocal());
+    return DateFormat('dd MMM, yyyy, ${_timeFormatter()}').format(dateTime.toLocal());
   }
 
   static DateTime isoUtcStringToLocalTimeOnly(String dateTime) {
@@ -211,6 +211,10 @@ class DateConverter {
 
   static String stringToLocalDateOnly(String dateTime) {
     return DateFormat('dd MMM, yyyy').format(DateTime.parse(dateTime).toLocal());
+  }
+
+  static String isoStringToLocalString(String dateTime) {
+    return DateFormat('yyyy-MM-dd HH:mm:ss').format(DateTime.parse(dateTime).toLocal());
   }
 
 }

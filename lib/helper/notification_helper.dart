@@ -3,9 +3,11 @@ import 'dart:io';
 import 'package:stackfood_multivendor_restaurant/features/advertisement/controllers/advertisement_controller.dart';
 import 'package:stackfood_multivendor_restaurant/features/auth/controllers/auth_controller.dart';
 import 'package:stackfood_multivendor_restaurant/features/chat/controllers/chat_controller.dart';
+import 'package:stackfood_multivendor_restaurant/features/dashboard/screens/dashboard_screen.dart';
 import 'package:stackfood_multivendor_restaurant/features/order/controllers/order_controller.dart';
 import 'package:stackfood_multivendor_restaurant/features/chat/domain/models/notification_body_model.dart';
 import 'package:stackfood_multivendor_restaurant/features/dashboard/widgets/new_request_dialog_widget.dart';
+import 'package:stackfood_multivendor_restaurant/features/splash/controllers/splash_controller.dart';
 import 'package:stackfood_multivendor_restaurant/helper/custom_print_helper.dart';
 import 'package:stackfood_multivendor_restaurant/helper/route_helper.dart';
 import 'package:stackfood_multivendor_restaurant/helper/user_type.dart';
@@ -31,18 +33,25 @@ class NotificationHelper {
           NotificationBodyModel payload = NotificationBodyModel.fromJson(jsonDecode(load.payload!));
 
           if(payload.notificationType == NotificationType.order){
-            Get.toNamed(RouteHelper.getOrderDetailsRoute(payload.orderId));
-          }else if(payload.notificationType == NotificationType.general){
-            Get.toNamed(RouteHelper.getNotificationRoute(fromNotification: true));
+            Get.toNamed(RouteHelper.getOrderDetailsRoute(payload.orderId, fromNotification: true));
           }else if(payload.notificationType == NotificationType.advertisement){
-            Get.toNamed(RouteHelper.getAdvertisementListRoute());
-          } else{
+            Get.toNamed(RouteHelper.getAdvertisementDetailsScreen(advertisementId: payload.advertisementId, fromNotification: true));
+          }else if(payload.notificationType == NotificationType.message){
             customPrint('message enter');
             Get.toNamed(RouteHelper.getChatRoute(
               notificationBody: payload,
               conversationId: payload.conversationId,
+              fromNotification: true,
             ));
-          }
+          }else if(payload.notificationType == NotificationType.block || payload.notificationType == NotificationType.unblock){
+            Get.toNamed(RouteHelper.getSignInRoute());
+          }else if(payload.notificationType == NotificationType.withdraw){
+            Get.to(const DashboardScreen(pageIndex: 3));
+          }else if(payload.notificationType == NotificationType.campaign){
+            Get.toNamed(RouteHelper.getCampaignDetailsRoute(id: payload.campaignId, fromNotification: true));
+          }else{
+          Get.toNamed(RouteHelper.getNotificationRoute(fromNotification: true));
+        }
 
         }
       }catch(_){}
@@ -53,6 +62,10 @@ class NotificationHelper {
       customPrint("onMessage: ${message.data}");
       customPrint("onMessage message type:${message.data['type']}");
 
+      if(message.data['type'] == 'maintenance'){
+        Get.find<SplashController>().getConfigData();
+      }
+
       if(message.data['type'] == 'message' && Get.currentRoute.startsWith(RouteHelper.chatScreen)) {
         if(Get.find<AuthController>().isLoggedIn()) {
           Get.find<ChatController>().getConversationList(1);
@@ -60,6 +73,7 @@ class NotificationHelper {
             Get.find<ChatController>().getMessages(
               1, NotificationBodyModel(
               notificationType: NotificationType.message,
+              adminId: message.data['sender_type'] == UserType.admin.name ? 0 : null,
               customerId: message.data['sender_type'] == UserType.user.name ? 0 : null,
               deliveryManId: message.data['sender_type'] == UserType.delivery_man.name ? 0 : null,
             ),
@@ -74,11 +88,11 @@ class NotificationHelper {
           Get.find<ChatController>().getConversationList(1);
         }
         NotificationHelper.showNotification(message, flutterLocalNotificationsPlugin);
+      }else if(message.data['type'] == 'maintenance'){
       } else {
         NotificationHelper.showNotification(message, flutterLocalNotificationsPlugin);
 
-        if (message.data['type'] == 'new_order' ||
-            message.data['title'] == 'New order placed') {
+        if (message.data['type'] == 'new_order' || message.data['title'] == 'New order placed') {
           Get.find<OrderController>().getPaginatedOrders(1, true);
           Get.find<OrderController>().getCurrentOrders();
 
@@ -97,11 +111,19 @@ class NotificationHelper {
         NotificationBodyModel notificationBody = convertNotification(message.data);
 
         if(notificationBody.notificationType == NotificationType.order){
-          Get.toNamed(RouteHelper.getOrderDetailsRoute(int.parse(message.data['order_id'])));
-        } else if(notificationBody.notificationType == NotificationType.general){
+          Get.toNamed(RouteHelper.getOrderDetailsRoute(int.parse(message.data['order_id']), fromNotification: true));
+        }else if(notificationBody.notificationType == NotificationType.message){
+          Get.toNamed(RouteHelper.getChatRoute(notificationBody: notificationBody, conversationId: notificationBody.conversationId, fromNotification: true));
+        }else if(notificationBody.notificationType == NotificationType.block || notificationBody.notificationType == NotificationType.unblock) {
+          Get.toNamed(RouteHelper.getSignInRoute());
+        }else if(notificationBody.notificationType == NotificationType.withdraw){
+          Get.to(const DashboardScreen(pageIndex: 3));
+        }else if(notificationBody.notificationType == NotificationType.advertisement){
+          Get.toNamed(RouteHelper.getAdvertisementDetailsScreen(advertisementId: notificationBody.advertisementId, fromNotification: true));
+        }else if(notificationBody.notificationType == NotificationType.campaign){
+          Get.toNamed(RouteHelper.getCampaignDetailsRoute(id: notificationBody.campaignId, fromNotification: true));
+        }else{
           Get.toNamed(RouteHelper.getNotificationRoute(fromNotification: true));
-        } else{
-          Get.toNamed(RouteHelper.getChatRoute(notificationBody: notificationBody, conversationId: notificationBody.conversationId));
         }
       }catch (_) {}
     });
@@ -185,32 +207,31 @@ class NotificationHelper {
   }
 
   static NotificationBodyModel convertNotification(Map<String, dynamic> data){
-    if(data['type'] == 'general'){
-      return NotificationBodyModel(notificationType: NotificationType.general) ;
-    }
-    else if(data['type'] == 'advertisement'){
-      return NotificationBodyModel(notificationType: NotificationType.advertisement) ;
-    }
-    else if(data['type'] == 'new_order' || data['type'] == 'New order placed' || data['type'] == 'order_status'){
+    if(data['type'] == 'advertisement'){
+      return NotificationBodyModel(notificationType: NotificationType.advertisement, advertisementId: int.parse(data['advertisement_id']));
+    } else if(data['type'] == 'new_order' || data['type'] == 'New order placed' || data['type'] == 'order_status'){
       return NotificationBodyModel(orderId: int.parse(data['order_id']), notificationType: NotificationType.order);
-    }
-    else{
+    } else if(data['type'] == 'message'){
       return NotificationBodyModel(
         orderId: (data['order_id'] != null && data['order_id'].isNotEmpty) ? int.parse(data['order_id']) : null,
         conversationId: (data['conversation_id'] != null && data['conversation_id'].isNotEmpty) ? int.parse(data['conversation_id']) : null,
         notificationType: NotificationType.message,
         type: data['sender_type'] == UserType.delivery_man.name ? UserType.delivery_man.name : UserType.customer.name,
       );
+    }else if(data['type'] == 'block'){
+      return NotificationBodyModel(notificationType: NotificationType.block);
+    }else if(data['type'] == 'unblock'){
+      return NotificationBodyModel(notificationType: NotificationType.unblock);
+    }else if(data['type'] == 'withdraw'){
+      return NotificationBodyModel(notificationType: NotificationType.withdraw);
+    }else if(data['type'] == 'campaign'){
+      return NotificationBodyModel(notificationType: NotificationType.campaign, campaignId: int.parse(data['data_id']));
+    }else{
+      return NotificationBodyModel(notificationType: NotificationType.general) ;
     }
   }
 }
 
 Future<dynamic> myBackgroundMessageHandler(RemoteMessage message) async {
   customPrint("onBackground: ${message.data}");
-  // var androidInitialize = new AndroidInitializationSettings('notification_icon');
-  // var iOSInitialize = new IOSInitializationSettings();
-  // var initializationsSettings = new InitializationSettings(android: androidInitialize, iOS: iOSInitialize);
-  // FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
-  // flutterLocalNotificationsPlugin.initialize(initializationsSettings);
-  // NotificationHelper.showNotification(message, flutterLocalNotificationsPlugin, true);
 }

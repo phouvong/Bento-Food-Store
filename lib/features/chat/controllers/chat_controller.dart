@@ -1,14 +1,19 @@
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:stackfood_multivendor_restaurant/common/widgets/custom_snackbar_widget.dart';
 import 'package:stackfood_multivendor_restaurant/features/chat/domain/services/chat_service_interface.dart';
 import 'package:stackfood_multivendor_restaurant/api/api_client.dart';
 import 'package:stackfood_multivendor_restaurant/features/chat/domain/models/notification_body_model.dart';
 import 'package:stackfood_multivendor_restaurant/features/chat/domain/models/conversation_model.dart';
 import 'package:stackfood_multivendor_restaurant/features/chat/domain/models/message_model.dart';
 import 'package:stackfood_multivendor_restaurant/features/profile/controllers/profile_controller.dart';
+import 'package:stackfood_multivendor_restaurant/features/splash/controllers/splash_controller.dart';
 import 'package:stackfood_multivendor_restaurant/helper/date_converter_helper.dart';
+import 'package:stackfood_multivendor_restaurant/helper/image_size_checker.dart';
 import 'package:stackfood_multivendor_restaurant/helper/user_type.dart';
 import 'package:get/get.dart';
-import 'package:image_picker/image_picker.dart';
+import 'package:stackfood_multivendor_restaurant/util/app_constants.dart';
 
 class ChatController extends GetxController implements GetxService {
   final ChatServiceInterface chatServiceInterface;
@@ -23,9 +28,6 @@ class ChatController extends GetxController implements GetxService {
   List<bool>? _showDate;
   List<bool>? get showDate => _showDate;
 
-  List<XFile>? _imageFiles;
-  List<XFile>? get imageFiles => _imageFiles;
-
   bool _isSendButtonActive = false;
   bool get isSendButtonActive => _isSendButtonActive;
 
@@ -34,9 +36,6 @@ class ChatController extends GetxController implements GetxService {
 
   final bool _isSend = true;
   bool get isSend => _isSend;
-
-  bool _isMe = false;
-  bool get isMe => _isMe;
 
   List <XFile>?_chatImage = [];
   List<XFile>? get chatImage => _chatImage;
@@ -74,6 +73,29 @@ class ChatController extends GetxController implements GetxService {
   bool _isClickedOnImageOrFile = false;
   bool get isClickedOnImageOrFile => _isClickedOnImageOrFile;
 
+  bool _takeImageLoading= false;
+  bool get takeImageLoading => _takeImageLoading;
+
+  List <Uint8List>_chatRawImage = [];
+  List<Uint8List> get chatRawImage => _chatRawImage;
+
+  List<XFile> objFile = [];
+
+  bool _singleFIleCrossMaxLimit = false;
+  bool get singleFIleCrossMaxLimit => _singleFIleCrossMaxLimit;
+
+  XFile? _pickedVideoFile;
+  XFile? get pickedVideoFile => _pickedVideoFile;
+
+  bool _showFloatingButton = false;
+  bool get showFloatingButton => _showFloatingButton;
+
+  final Conversation _adminConversationModel = Conversation(unreadMessageCount: null);
+  Conversation get adminConversationModel => _adminConversationModel;
+
+  bool _hasAdmin = true;
+  bool get hasAdmin => _hasAdmin;
+
   Future<void> getConversationList(int offset, {String type = '', bool canUpdate = true, bool fromTab = true}) async {
     if(fromTab) {
       _tabLoading = true;
@@ -81,6 +103,7 @@ class ChatController extends GetxController implements GetxService {
     if(canUpdate) {
       update();
     }
+    _hasAdmin = true;
     _searchConversationModel = null;
     ConversationsModel? conversationModel = await chatServiceInterface.getConversationList(offset, type);
     if(conversationModel != null) {
@@ -91,6 +114,13 @@ class ChatController extends GetxController implements GetxService {
         _conversationModel!.offset = conversationModel.offset;
         _conversationModel!.conversations!.addAll(conversationModel.conversations!);
       }
+
+      bool sender = chatServiceInterface.checkSender(_conversationModel!.conversations);
+      _hasAdmin = false;
+
+      if(sender) {
+        _hasAdmin = true;
+      }
     }
     _tabLoading = false;
     update();
@@ -99,25 +129,56 @@ class ChatController extends GetxController implements GetxService {
   Future<void> searchConversation(String name) async {
     _searchConversationModel = ConversationsModel();
     update();
+    ConversationsModel searchConversationModel = await chatServiceInterface.searchConversationList(name);
+    if(searchConversationModel.conversations != null) {
+      _searchConversationModel = searchConversationModel;
+      int index0 = chatServiceInterface.setIndex(_searchConversationModel!.conversations);
+      late bool sender = chatServiceInterface.checkSender(_searchConversationModel!.conversations);
+      if(index0 != -1) {
+        if(sender) {
+          _searchConversationModel!.conversations![index0].sender = User(
+            id: 0, fName: Get.find<SplashController>().configModel!.businessName, lName: '',
+            phone: Get.find<SplashController>().configModel!.phone, email: Get.find<SplashController>().configModel!.email,
+            imageFullUrl: Get.find<SplashController>().configModel!.logoFullUrl,
+          );
+        }else {
+          _searchConversationModel!.conversations![index0].receiver = User(
+            id: 0, fName: Get.find<SplashController>().configModel!.businessName, lName: '',
+            phone: Get.find<SplashController>().configModel!.phone, email: Get.find<SplashController>().configModel!.email,
+            imageFullUrl: Get.find<SplashController>().configModel!.logoFullUrl,
+          );
+        }
+      }
+    }
+    update();
+  }
+/*
+  Future<void> searchConversation(String name) async {
+    _searchConversationModel = ConversationsModel();
+    update();
     ConversationsModel? searchConversationModel = await chatServiceInterface.searchConversationList(name);
     if(searchConversationModel != null) {
       _searchConversationModel = searchConversationModel;
     }
     update();
-  }
+  }*/
 
   void removeSearchMode() {
     _searchConversationModel = null;
     update();
   }
 
-  Future<void> getMessages(int offset, NotificationBodyModel notificationBody, User? user, int? conversationID, {bool firstLoad = false}) async {
+  Future<void> getMessages(int offset, NotificationBodyModel? notificationBody, User? user, int? conversationID, {bool firstLoad = false}) async {
     Response? response;
     if(firstLoad) {
       _messageModel = null;
+      _isSendButtonActive = false;
+      _isLoading = false;
     }
 
-    if(notificationBody.customerId != null || notificationBody.type == UserType.customer.name || notificationBody.type == UserType.user.name) {
+    if(notificationBody == null || notificationBody.adminId != null) {
+      response = await chatServiceInterface.getMessages(offset, 0, UserType.admin, null);
+    } else if(notificationBody.customerId != null || notificationBody.type == UserType.customer.name || notificationBody.type == UserType.user.name) {
       response = await chatServiceInterface.getMessages(offset, notificationBody.customerId, UserType.user, conversationID);
     }else if(notificationBody.deliveryManId != null || notificationBody.type == UserType.delivery_man.name) {
       response = await chatServiceInterface.getMessages(offset, notificationBody.deliveryManId, UserType.delivery_man, conversationID);
@@ -125,20 +186,31 @@ class ChatController extends GetxController implements GetxService {
 
     if (response != null && response.body['messages'] != {} && response.statusCode == 200) {
       if (offset == 1) {
+
+        /// Unread-read
+        if(conversationID != null && _conversationModel != null) {
+          int index = chatServiceInterface.findOutConversationUnreadIndex(_conversationModel!.conversations, conversationID);
+          if(index != -1) {
+            _conversationModel!.conversations![index].unreadMessageCount = 0;
+          }
+        }
+
         if(Get.find<ProfileController>().profileModel == null) {
           await Get.find<ProfileController>().getProfile();
         }
+
+        /// Manage Receiver
         _messageModel = MessageModel.fromJson(response.body);
-        if(_messageModel!.conversation == null && user != null) {
+        if(_messageModel!.conversation == null) {
           _messageModel!.conversation = Conversation(sender: User(
             id: Get.find<ProfileController>().profileModel!.id, imageFullUrl: Get.find<ProfileController>().profileModel!.imageFullUrl,
             fName: Get.find<ProfileController>().profileModel!.fName, lName: Get.find<ProfileController>().profileModel!.lName,
-          ), receiver: user);
-        }else if(_messageModel!.conversation != null && _messageModel!.conversation!.receiverType == 'vendor') {
-          User? receiver = _messageModel!.conversation!.receiver;
-          _messageModel!.conversation!.receiver = _messageModel!.conversation!.sender;
-          _messageModel!.conversation!.sender = receiver;
+          ), receiver: notificationBody!.adminId != null ? User(
+            id: 0, fName: Get.find<SplashController>().configModel!.businessName, lName: '',
+            imageFullUrl: Get.find<SplashController>().configModel!.logoFullUrl,
+          ) : user);
         }
+        _sortMessage(notificationBody!.adminId);
       }else {
         _messageModel!.totalSize = MessageModel.fromJson(response.body).totalSize;
         _messageModel!.offset = MessageModel.fromJson(response.body).offset;
@@ -150,57 +222,166 @@ class ChatController extends GetxController implements GetxService {
 
   }
 
+  void _sortMessage(int? adminId) {
+    if(_messageModel!.conversation != null && (_messageModel!.conversation!.receiverType == UserType.user.name || _messageModel!.conversation!.receiverType == UserType.vendor.name)) {
+      User? receiver = _messageModel!.conversation!.receiver;
+      _messageModel!.conversation!.receiver = _messageModel!.conversation!.sender;
+      _messageModel!.conversation!.sender = receiver;
+    }
+    if(adminId != null) {
+      _messageModel!.conversation!.receiver = User(
+        id: 0, fName: Get.find<SplashController>().configModel!.businessName, lName: '',
+        imageFullUrl: Get.find<SplashController>().configModel!.logoFullUrl,
+      );
+    }
+  }
+
   void pickImage(bool isRemove) async {
+    _takeImageLoading = true;
+    update();
+
     if(isRemove) {
-      _imageFiles = [];
       _chatImage = [];
-    }else {
-      _imageFiles = await ImagePicker().pickMultiImage(imageQuality: 40);
-      if (_imageFiles != null) {
-        _chatImage = imageFiles;
-        _isSendButtonActive = true;
+      _chatRawImage = [];
+    } else {
+      List<XFile> imageFiles = await ImagePicker().pickMultiImage(imageQuality: 40);
+      for(XFile xFile in imageFiles) {
+        if(_chatImage!.length >= AppConstants.maxImageSend) {
+          showCustomSnackBar('can_not_add_more_than_3_image'.tr);
+          break;
+        }else {
+          objFile = [];
+          _pickedVideoFile = null;
+          _chatImage?.add(xFile);
+          _chatRawImage.add(await xFile.readAsBytes());
+        }
       }
+      _isSendButtonActive = true;
+    }
+    _takeImageLoading = false;
+    update();
+  }
+
+  void pickFile(bool isRemove, {int? index}) async {
+    _takeImageLoading = true;
+    update();
+
+    _singleFIleCrossMaxLimit = false;
+
+    if(isRemove) {
+      objFile.removeAt(index!);
+    } else {
+      List<PlatformFile>? platformFile = (await FilePicker.platform.pickFiles(
+        allowMultiple: true,
+        withReadStream: true,
+        type: FileType.custom,
+        allowedExtensions: ['pdf', 'doc'],
+      ))?.files ;
+
+      objFile = [];
+      _chatImage = [];
+      _pickedVideoFile = null;
+
+      platformFile?.forEach((element) async {
+        if(_getFileSizeFromPlatformFileToDouble(element) > AppConstants.maxSizeOfASingleFile) {
+          _singleFIleCrossMaxLimit = true;
+        } else {
+          if(objFile.length < AppConstants.maxLimitOfTotalFileSent){
+            if((await _getMultipleFileSizeFromPlatformFiles(objFile) + _getFileSizeFromPlatformFileToDouble(element)) < AppConstants.maxLimitOfFileSentINConversation){
+              objFile.add(element.xFile);
+            }
+          }
+
+        }
+      });
+
+      _isSendButtonActive = true;
+    }
+    _takeImageLoading = false;
+    update();
+  }
+
+  void pickVideoFile(bool isRemove) async {
+    _takeImageLoading = true;
+    update();
+
+    if(isRemove) {
+      _pickedVideoFile = null;
+    } else {
+      _pickedVideoFile = await ImagePicker().pickVideo(source: ImageSource.gallery);
+      if(_pickedVideoFile != null){
+        double videoSize = await ImageSize.getImageSizeFromXFile(_pickedVideoFile!);
+        if(videoSize > AppConstants.limitOfPickedVideoSizeInMB){
+          _pickedVideoFile = null;
+          showCustomSnackBar('${"video_size_greater_than".tr} ${AppConstants.limitOfPickedVideoSizeInMB}mb');
+          update();
+        }else{
+          _chatImage = [];
+          objFile = [];
+        }
+
+      }
+      _isSendButtonActive = true;
+    }
+    _takeImageLoading = false;
+    update();
+  }
+
+  void removeImage(int index,  String messageText){
+    _chatImage?.removeAt(index);
+    _chatRawImage.removeAt(index);
+    if(_chatImage!.isEmpty && messageText.isEmpty) {
+      _isSendButtonActive = false;
     }
     update();
   }
 
-  void removeImage(int index){
-    chatImage!.removeAt(index);
-    update();
-  }
-
-  Future<Response?> sendMessage({required String message, required NotificationBodyModel? notificationBody, required int? conversationId}) async {
+  Future<Response?> sendMessage({required String message, required NotificationBodyModel? notificationBody, required int? conversationId, required int? index}) async {
     Response? response;
     _isLoading = true;
     update();
 
-    List<MultipartBody> myImages = [];
-    for (var image in _chatImage!) {
-      myImages.add(MultipartBody('image[]', image));
-    }
+    List<MultipartBody> chatImages = chatServiceInterface.processImages(_chatImage, objFile, _pickedVideoFile);
 
-    if(notificationBody != null && (notificationBody.customerId != null || notificationBody.type == UserType.customer.name)) {
-      response = await chatServiceInterface.sendMessage(message, myImages, conversationId , notificationBody.customerId, UserType.customer);
+    if(notificationBody == null || notificationBody.adminId != null) {
+      response = await chatServiceInterface.sendMessage(message, chatImages, 0, null, UserType.admin);
+    } else if((notificationBody.customerId != null || notificationBody.type == UserType.customer.name)) {
+      response = await chatServiceInterface.sendMessage(message, chatImages, conversationId , notificationBody.customerId, UserType.customer);
     }
-    else if(notificationBody != null && (notificationBody.deliveryManId != null || notificationBody.type == UserType.delivery_man.name)){
-      response = await chatServiceInterface.sendMessage(message, myImages, conversationId , notificationBody.deliveryManId, UserType.delivery_man);
+    else if((notificationBody.deliveryManId != null || notificationBody.type == UserType.delivery_man.name)){
+      response = await chatServiceInterface.sendMessage(message, chatImages, conversationId , notificationBody.deliveryManId, UserType.delivery_man);
     }
 
     if (response!.statusCode == 200) {
-      _imageFiles = [];
       _chatImage = [];
+      objFile = [];
+      _pickedVideoFile = null;
+      _chatRawImage = [];
       _isSendButtonActive = false;
       _isLoading = false;
       _messageModel = MessageModel.fromJson(response.body);
-      if(_messageModel!.conversation != null && _messageModel!.conversation!.receiverType == 'vendor') {
+
+      if(index != null && _searchConversationModel != null) {
+        _searchConversationModel!.conversations![index].lastMessageTime = DateConverter.isoStringToLocalString(_messageModel!.messages![0].createdAt!);
+      }else if(index != null && _conversationModel != null) {
+        _conversationModel!.conversations![index].lastMessageTime = DateConverter.isoStringToLocalString(_messageModel!.messages![0].createdAt!);
+      }
+      if(_conversationModel != null && !_hasAdmin && (_messageModel!.conversation!.senderType == UserType.admin.name || _messageModel!.conversation!.receiverType == UserType.admin.name)) {
+        _conversationModel!.conversations!.add(_messageModel!.conversation!);
+        _hasAdmin = true;
+      }
+
+      _sortMessage(notificationBody!.adminId);
+      Future.delayed(const Duration(seconds: 2),() {
+        getMessages(1, notificationBody, null, conversationId);
+      });
+      /*if(_messageModel!.conversation != null && _messageModel!.conversation!.receiverType == 'vendor') {
         User? receiver = _messageModel!.conversation!.receiver;
         _messageModel!.conversation!.receiver = _messageModel!.conversation!.sender;
         _messageModel!.conversation!.sender = receiver;
-      }
+      }*/
     }
-
-    _imageFiles = [];
-    _chatImage = [];
+    _isLoading = false;
     update();
     return response;
   }
@@ -210,20 +391,11 @@ class ChatController extends GetxController implements GetxService {
     update();
   }
 
-  void setImageList(List<XFile> images) {
-    _imageFiles = [];
-    _imageFiles = images;
-    _isSendButtonActive = true;
-    update();
-  }
-
-  void setIsMe(bool value) {
-    _isMe = value;
-  }
-
-  void setType(String type) {
+  void setType(String type, {bool willUpdate = true}) {
     _type = type;
-    update();
+    if(willUpdate) {
+      update();
+    }
   }
 
   void setTabSelect() {
@@ -353,6 +525,27 @@ class ChatController extends GetxController implements GetxService {
       _onImageOrFileTimeShowID = onImageOrFileTimeShowID;
     }
     update();
+  }
+
+  void canShowFloatingButton(bool status) {
+    _showFloatingButton = status;
+    update();
+  }
+
+
+
+  double _getFileSizeFromPlatformFileToDouble(PlatformFile platformFile)  {
+    return (platformFile.size / (1024 * 1024));
+  }
+
+  Future<double> _getMultipleFileSizeFromPlatformFiles(List<XFile> platformFiles)  async {
+    double fileSize = 0.0;
+    for (var element in platformFiles) {
+      int sizeInKB =  await element.length();
+      double sizeInMB = sizeInKB / (1024 * 1024);
+      fileSize  = sizeInMB + fileSize;
+    }
+    return fileSize;
   }
 
 }

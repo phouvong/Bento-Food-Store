@@ -38,8 +38,8 @@ class _PosScreenState extends State<PosScreen> {
           color: Theme.of(context).textTheme.bodyLarge!.color,
           onPressed: () => Get.back(),
         ),
-        title: TypeAheadField(
-          textFieldConfiguration: TextFieldConfiguration(
+        title: TypeAheadField<Product>(
+          builder: (context, controller, focusNode) => TextField(
             controller: _searchController,
             textInputAction: TextInputAction.search,
             autofocus: false,
@@ -92,7 +92,7 @@ class _PosScreenState extends State<PosScreen> {
               ]),
             );
           },
-          onSuggestionSelected: (Product suggestion) {
+          onSelected: (Product suggestion) {
             _searchController.text = '';
           },
         ),

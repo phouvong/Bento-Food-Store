@@ -1,10 +1,10 @@
 import 'dart:typed_data';
 import 'package:get/get.dart';
 import 'package:pdf/widgets.dart' as pw;
-import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'dart:io';
 import 'package:stackfood_multivendor_restaurant/common/widgets/custom_snackbar_widget.dart';
+import 'package:stackfood_multivendor_restaurant/helper/pdf_download_helper.dart';
 
 Future<void> capturedImageToPdf({Uint8List? capturedImage, required String businessName, required String orderId}) async {
   if (capturedImage == null) return;
@@ -23,7 +23,7 @@ Future<void> capturedImageToPdf({Uint8List? capturedImage, required String busin
     ),
   );
 
-  final output = await getProjectDirectory(businessName);
+  final output = await PdfDownloadHelper.getProjectDirectory(businessName);
   final file = File("${output.path}/${'invoice'.tr}-$orderId.pdf");
 
   await Permission.storage.request();
@@ -34,22 +34,4 @@ Future<void> capturedImageToPdf({Uint8List? capturedImage, required String busin
   } else {
     showCustomSnackBar('permission_denied_cannot_download_the_file'.tr);
   }
-}
-
-Future<Directory> getProjectDirectory(String projectName) async {
-  Directory? downloadsDirectory;
-  if (Platform.isAndroid) {
-    downloadsDirectory = Directory('/storage/emulated/0/Download/$projectName');
-  } else if (Platform.isIOS) {
-    final documentsDirectory = await getApplicationDocumentsDirectory();
-    downloadsDirectory = Directory('${documentsDirectory.path}/$projectName');
-  } else {
-    throw UnsupportedError('Unsupported platform');
-  }
-
-  if (!await downloadsDirectory.exists()) {
-    await downloadsDirectory.create(recursive: true);
-  }
-
-  return downloadsDirectory;
 }

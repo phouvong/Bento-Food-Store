@@ -61,6 +61,7 @@ class ProfileRepository implements ProfileRepositoryInterface {
       if(!GetPlatform.isWeb) {
         FirebaseMessaging.instance.subscribeToTopic(AppConstants.topic);
         FirebaseMessaging.instance.subscribeToTopic(sharedPreferences.getString(AppConstants.zoneTopic)!);
+        FirebaseMessaging.instance.subscribeToTopic(AppConstants.maintenanceModeTopic);
       }
     }
     return await apiClient.postData(AppConstants.tokenUri, {"_method": "put", "token": getUserToken(), "fcm_token": notificationDeviceToken.isNotEmpty ? notificationDeviceToken : deviceToken}, handleError: false);
@@ -104,25 +105,21 @@ class ProfileRepository implements ProfileRepositoryInterface {
 
   @override
   Future add(value) {
-    // TODO: implement add
     throw UnimplementedError();
   }
 
   @override
   Future get(int id) {
-    // TODO: implement get
     throw UnimplementedError();
   }
 
   @override
   Future getList() {
-    // TODO: implement getList
     throw UnimplementedError();
   }
 
   @override
   Future update(Map<String, dynamic> body) {
-    // TODO: implement update
     throw UnimplementedError();
   }
   

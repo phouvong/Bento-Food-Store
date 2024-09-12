@@ -69,9 +69,12 @@ class CustomTextFormFieldWidgetState extends State<CustomTextFormFieldWidget> {
 
       widget.showTitle ? Row(children: [
 
-        Text(
-          widget.titleName ?? widget.hintText!,
-          style: robotoMedium.copyWith(fontSize: Dimensions.fontSizeLarge),
+        Flexible(
+          child: Text(
+            widget.titleName ?? widget.hintText!,
+            style: robotoMedium.copyWith(fontSize: Dimensions.fontSizeLarge),
+            maxLines: 1, overflow: TextOverflow.ellipsis,
+          ),
         ),
         const SizedBox(width: Dimensions.paddingSizeExtraSmall),
 

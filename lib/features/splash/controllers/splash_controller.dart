@@ -1,8 +1,10 @@
 import 'package:stackfood_multivendor_restaurant/common/models/config_model.dart';
+import 'package:stackfood_multivendor_restaurant/features/auth/controllers/auth_controller.dart';
 import 'package:stackfood_multivendor_restaurant/features/restaurant/controllers/restaurant_controller.dart';
 import 'package:stackfood_multivendor_restaurant/features/splash/domain/services/splash_service_interface.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
+import 'package:stackfood_multivendor_restaurant/helper/route_helper.dart';
 
 class SplashController extends GetxController implements GetxService {
   final SplashServiceInterface splashServiceInterface;
@@ -22,6 +24,21 @@ class SplashController extends GetxController implements GetxService {
     bool isSuccess = false;
     if(configModel != null) {
       _configModel = configModel;
+
+      bool isMaintenanceMode = _configModel!.maintenanceMode!;
+      String platform = 'restaurant_app';
+      bool isInMaintenance = isMaintenanceMode && _configModel!.maintenanceModeData!.maintenanceSystemSetup!.contains(platform);
+
+      if(isInMaintenance) {
+        Get.offNamed(RouteHelper.getUpdateRoute(false));
+      }else if((Get.currentRoute.contains(RouteHelper.update) && !isMaintenanceMode) || (!isInMaintenance)) {
+        if(Get.find<AuthController>().isLoggedIn()) {
+          Get.offAllNamed(RouteHelper.getInitialRoute());
+        }else {
+          Get.offAllNamed(RouteHelper.getSignInRoute());
+        }
+      }
+
       isSuccess = true;
       Get.find<RestaurantController>().setOrderStatus(_configModel!.instantOrder!, _configModel!.scheduleOrder!);
     }

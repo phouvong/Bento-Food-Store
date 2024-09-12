@@ -21,6 +21,16 @@ class ForgetPassScreen extends StatefulWidget {
 class _ForgetPassScreenState extends State<ForgetPassScreen> {
 
   final TextEditingController _emailController = TextEditingController();
+  final FocusNode _emailFocus = FocusNode();
+
+  @override
+  void initState() {
+    super.initState();
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      FocusScope.of(context).requestFocus(_emailFocus);
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -61,7 +71,8 @@ class _ForgetPassScreenState extends State<ForgetPassScreen> {
                   controller: _emailController,
                   inputType: TextInputType.emailAddress,
                   inputAction: TextInputAction.done,
-                  hintText: 'email'.tr,
+                  focusNode: _emailFocus,
+                  hintText: 'enter_email'.tr,
                   labelText: 'email'.tr,
                   prefixIcon: Icons.email,
                   onChanged: (String text) => setState(() {}),

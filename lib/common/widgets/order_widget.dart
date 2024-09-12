@@ -1,4 +1,3 @@
-import 'package:flutter/foundation.dart';
 import 'package:stackfood_multivendor_restaurant/features/order/domain/models/order_model.dart';
 import 'package:stackfood_multivendor_restaurant/features/order/screens/order_details_screen.dart';
 import 'package:stackfood_multivendor_restaurant/helper/date_converter_helper.dart';
@@ -115,37 +114,5 @@ class OrderWidget extends StatelessWidget {
         ]),
       ),
     );
-  }
-
-  String getChatTime(String todayChatTimeInUtc) {
-    String chatTime = '';
-    DateTime todayConversationDateTime = DateConverter.isoUtcStringToLocalTimeOnly(todayChatTimeInUtc);
-    try{
-      todayConversationDateTime = DateConverter.isoUtcStringToLocalTimeOnly(todayChatTimeInUtc);
-    }catch(e) {
-      todayConversationDateTime = DateConverter.dateTimeStringToDate(todayChatTimeInUtc);
-    }
-
-    if (kDebugMode) {
-      print("Current Message DataTime: $todayConversationDateTime");
-    }
-
-    DateTime currentDate = DateTime.now();
-
-    if(currentDate.weekday != todayConversationDateTime.weekday && DateConverter.countDays(todayConversationDateTime) < 6){
-
-      if((currentDate.weekday -1 == 0 ? 7 : currentDate.weekday -1) == todayConversationDateTime.weekday){
-        chatTime = DateConverter.convert24HourTimeTo12HourTimeWithDay(todayConversationDateTime, false);
-      } else {
-        chatTime = DateConverter.convertStringTimeToDateTime(todayConversationDateTime);
-      }
-
-    } else if(currentDate.weekday == todayConversationDateTime.weekday
-        && DateConverter.countDays(todayConversationDateTime) < 6){
-      chatTime = DateConverter.convert24HourTimeTo12HourTimeWithDay(todayConversationDateTime, true);
-    } else {
-      chatTime = DateConverter.isoStringToLocalDateAndTime(todayChatTimeInUtc);
-    }
-    return chatTime;
   }
 }

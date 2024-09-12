@@ -8,7 +8,6 @@ import 'package:stackfood_multivendor_restaurant/features/campaign/screens/campa
 import 'package:stackfood_multivendor_restaurant/features/campaign/screens/campaign_screen.dart';
 import 'package:stackfood_multivendor_restaurant/features/category/screens/category_screen.dart';
 import 'package:stackfood_multivendor_restaurant/features/chat/domain/models/notification_body_model.dart';
-import 'package:stackfood_multivendor_restaurant/features/campaign/domain/models/campaign_model.dart';
 import 'package:stackfood_multivendor_restaurant/features/category/domain/models/category_model.dart';
 import 'package:stackfood_multivendor_restaurant/features/chat/domain/models/conversation_model.dart';
 import 'package:stackfood_multivendor_restaurant/features/dashboard/screens/dashboard_screen.dart';
@@ -139,7 +138,7 @@ class RouteHelper {
   static String getMainRoute(String page) => '$main?page=$page';
   static String getForgotPassRoute() => forgotPassword;
   static String getResetPasswordRoute(String? phone, String token, String page) => '$resetPassword?phone=$phone&token=$token&page=$page';
-  static String getOrderDetailsRoute(int? orderID) => '$orderDetails?id=$orderID';
+  static String getOrderDetailsRoute(int? orderID, {bool fromNotification = false}) => '$orderDetails?id=$orderID&from_notification=$fromNotification';
   static String getProfileRoute() => profile;
   static String getUpdateProfileRoute() => updateProfile;
   static String getNotificationRoute({bool fromNotification = false}) => '$notification?from_notification=${fromNotification.toString()}';
@@ -148,7 +147,7 @@ class RouteHelper {
   static String getWithdrawHistoryRoute() => withdrawHistory;
   static String getRestaurantRoute() => restaurant;
   static String getCampaignRoute() => campaign;
-  static String getCampaignDetailsRoute(int? id) => '$campaignDetails?id=$id';
+  static String getCampaignDetailsRoute({int? id, bool fromNotification = false}) => '$campaignDetails?id=$id&from_notification=$fromNotification';
   static String getUpdateRoute(bool willUpdate) => '$update?update=${willUpdate.toString()}';
   static String getProductRoute(Product? productModel) {
     if(productModel == null) {
@@ -206,7 +205,7 @@ class RouteHelper {
   }
   static String getTermsRoute() => terms;
   static String getPrivacyRoute() => privacy;
-  static String getChatRoute({required NotificationBodyModel? notificationBody, User? user, int? conversationId}) {
+  static String getChatRoute({required NotificationBodyModel? notificationBody, User? user, int? conversationId, int? index, bool fromNotification = false}) {
     
     String notificationBody0 = 'null';
     String user0 = 'null';
@@ -217,7 +216,7 @@ class RouteHelper {
     if(user != null) {
       user0 = base64Encode(utf8.encode(jsonEncode(user.toJson())));
     }
-    return '$chatScreen?notification_body=$notificationBody0&user=$user0&conversation_id=$conversationId';
+    return '$chatScreen?notification_body=$notificationBody0&user=$user0&conversation_id=$conversationId&index=$index&from_notification=$fromNotification';
   }
   static String getConversationListRoute() => conversationListScreen;
   static String getRestaurantRegistrationRoute() => restaurantRegistration;
@@ -277,6 +276,7 @@ class RouteHelper {
     GetPage(name: orderDetails, page: () {
       return Get.arguments ?? OrderDetailsScreen(
         orderModel: OrderModel(id: int.parse(Get.parameters['id']!)), isRunningOrder: false,
+        fromNotification: Get.parameters['from_notification'] == 'true',
       );
     }),
     GetPage(name: profile, page: () => const ProfileScreen()),
@@ -287,11 +287,7 @@ class RouteHelper {
     GetPage(name: withdrawHistory, page: () => const WithdrawRequestHistoryScreen()),
     GetPage(name: restaurant, page: () => const RestaurantScreen()),
     GetPage(name: campaign, page: () => const CampaignScreen()),
-    GetPage(name: campaignDetails, page: () {
-      return Get.arguments ?? CampaignDetailsScreen(
-        campaignModel: CampaignModel(id: int.parse(Get.parameters['id']!)),
-      );
-    }),
+    GetPage(name: campaignDetails, page: () => CampaignDetailsScreen(id: int.parse(Get.parameters['id']!), fromNotification: Get.parameters['from_notification'] == 'true')),
     GetPage(name: product, page: () {
       if(Get.parameters['data'] == 'null') {
         return const AddNameScreen(product: null);
@@ -358,8 +354,9 @@ class RouteHelper {
         user = User.fromJson(jsonDecode(utf8.decode(base64Url.decode(Get.parameters['user']!.replaceAll(' ', '+')))));
       }
       return ChatScreen(
-        notificationBody : notificationBody, user: user,
+        notificationBody : notificationBody, user: user, index: Get.parameters['index'] != 'null' ? int.parse(Get.parameters['index']!) : null,
         conversationId: Get.parameters['conversation_id'] != null && Get.parameters['conversation_id'] != 'null' ? int.parse(Get.parameters['conversation_id']!) : null,
+        fromNotification: Get.parameters['from_notification'] == 'true',
       );
     }),
     GetPage(name: conversationListScreen, page: () => const ConversationScreen()),

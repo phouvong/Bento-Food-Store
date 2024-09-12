@@ -27,7 +27,8 @@ class ProductViewWidget extends StatelessWidget {
           customPrint('end of the page');
           Get.find<RestaurantController>().showBottomLoader();
           Get.find<RestaurantController>().getProductList(
-            Get.find<RestaurantController>().offset.toString(), Get.find<RestaurantController>().type,
+            offset: Get.find<RestaurantController>().offset.toString(), foodType: Get.find<RestaurantController>().selectedFoodType,
+            stockType: Get.find<RestaurantController>().selectedStockType, categoryId: Get.find<RestaurantController>().categoryId,
           );
         }
       }

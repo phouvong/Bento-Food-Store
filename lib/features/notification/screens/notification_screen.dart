@@ -22,7 +22,7 @@ class NotificationScreen extends StatelessWidget {
 
     return PopScope(
       canPop: Navigator.canPop(context),
-      onPopInvoked: (didPop) async {
+      onPopInvokedWithResult: (didPop, result) async {
         if(fromNotification) {
           Get.offAllNamed(RouteHelper.getInitialRoute());
         }else {

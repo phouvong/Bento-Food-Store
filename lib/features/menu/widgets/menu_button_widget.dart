@@ -62,8 +62,7 @@ class MenuButtonWidget extends StatelessWidget {
             boxShadow: const [BoxShadow(color: Colors.black12, spreadRadius: 0, blurRadius: 5)],
           ),
           alignment: Alignment.center,
-          child: isProfile ? ProfileImageWidget(size: size) : CustomAssetImageWidget(image: menu.icon, width: size, height: size, color: menu.iconColor
-          ),
+          child: isProfile ? ProfileImageWidget(size: size) : CustomAssetImageWidget(image: menu.icon, width: size, height: size, color: menu.iconColor, fit: BoxFit.contain),
         ),
         const SizedBox(height: Dimensions.paddingSizeExtraSmall),
 

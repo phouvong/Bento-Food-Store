@@ -149,7 +149,7 @@ class _CampaignReportScreenState extends State<CampaignReportScreen> {
                 itemBuilder: (context, index) {
                   return ReportDetailsCardWidget(orders: reportController.orders![index]);
                 },
-              ) : Center(child: Padding(padding: const EdgeInsets.only(top : 200), child: Text('no_order_found'.tr, style: robotoMedium)))
+              ) : Center(child: Padding(padding: EdgeInsets.only(top : context.height * 0.4), child: Text('no_order_found'.tr, style: robotoMedium)))
                 : const Center(child: CircularProgressIndicator()),
 
               reportController.isLoading ? Center(child: Padding(

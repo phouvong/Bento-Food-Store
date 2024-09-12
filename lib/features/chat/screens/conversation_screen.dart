@@ -8,7 +8,9 @@ import 'package:stackfood_multivendor_restaurant/common/widgets/paginated_list_v
 import 'package:stackfood_multivendor_restaurant/features/chat/controllers/chat_controller.dart';
 import 'package:stackfood_multivendor_restaurant/features/chat/domain/models/notification_body_model.dart';
 import 'package:stackfood_multivendor_restaurant/features/chat/domain/models/conversation_model.dart';
+import 'package:stackfood_multivendor_restaurant/features/chat/widgets/message_card_widget.dart';
 import 'package:stackfood_multivendor_restaurant/features/chat/widgets/search_field_widget.dart';
+import 'package:stackfood_multivendor_restaurant/features/splash/controllers/splash_controller.dart';
 import 'package:stackfood_multivendor_restaurant/helper/date_converter_helper.dart';
 import 'package:stackfood_multivendor_restaurant/helper/route_helper.dart';
 import 'package:stackfood_multivendor_restaurant/helper/user_type.dart';
@@ -35,7 +37,15 @@ class _ConversationScreenState extends State<ConversationScreen> with TickerProv
   void initState() {
     super.initState();
     _tabController = TabController(length: 2, vsync: this);
+    Get.find<ChatController>().setType('customer', willUpdate: false);
     Get.find<ChatController>().getConversationList(1, type: Get.find<ChatController>().type);
+    _scrollController.addListener(() {
+      if(_scrollController.offset < 105) {
+        Get.find<ChatController>().canShowFloatingButton(false);
+      } else {
+        Get.find<ChatController>().canShowFloatingButton(true);
+      }
+    });
   }
 
   void _decideResult(ConversationsModel? conversation){
@@ -53,9 +63,9 @@ class _ConversationScreenState extends State<ConversationScreen> with TickerProv
       _tabController.animateTo(1);
       Get.find<ChatController>().setType('delivery_man');
       Get.find<ChatController>().setTabSelect();
-    } else if(type == 'vendor' && !_tabController.indexIsChanging) {
+    } else if(type == 'customer' && !_tabController.indexIsChanging) {
       _tabController.animateTo(0);
-      Get.find<ChatController>().setType('vendor');
+      Get.find<ChatController>().setType('customer');
       Get.find<ChatController>().setTabSelect();
     }
   }
@@ -75,6 +85,25 @@ class _ConversationScreenState extends State<ConversationScreen> with TickerProv
       return Scaffold(
 
         appBar: CustomAppBarWidget(title: 'conversation_list'.tr),
+        floatingActionButton: (chatController.conversationModel != null && chatController.showFloatingButton) ? FloatingActionButton(
+          backgroundColor: Theme.of(context).primaryColor,
+          elevation: 5,
+          onPressed: () => Get.toNamed(RouteHelper.getChatRoute(notificationBody: NotificationBodyModel(
+            notificationType: NotificationType.message, adminId: 0,
+          ))),
+          child: Container(
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(50),
+              boxShadow: const [BoxShadow(color: Colors.black12, blurRadius: 10)],
+            ),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(50),
+              child: CustomImageWidget(
+                image: '${Get.find<SplashController>().configModel!.logoFullUrl}',
+              ),
+            ),
+          ),
+        ) : null,
 
         body: Padding(
           padding: const EdgeInsets.all(Dimensions.paddingSizeSmall),
@@ -98,6 +127,7 @@ class _ConversationScreenState extends State<ConversationScreen> with TickerProv
                   if(chatController.searchConversationModel != null) {
                     _searchController.text = '';
                     chatController.removeSearchMode();
+                    chatController.getConversationList(1, type: 'customer');
                   }else {
                     if(_searchController.text.trim().isNotEmpty) {
                       chatController.searchConversation(_searchController.text.trim());
@@ -108,11 +138,27 @@ class _ConversationScreenState extends State<ConversationScreen> with TickerProv
                 },
               ))) : const SizedBox(),
 
-            Expanded(child: /*Get.find<AuthController>().isLoggedIn() ? (conversation0 != null && conversation0.conversations != null) ? */RefreshIndicator(
+            Expanded(child: RefreshIndicator(
               onRefresh: () async {
                 await Get.find<ChatController>().getConversationList(1, type: chatController.type);
               },
               child: CustomScrollView(controller: _scrollController, slivers: [
+
+                SliverToBoxAdapter(child: chatController.conversationModel != null ? Padding(
+                  padding: const EdgeInsets.only(left: Dimensions.paddingSizeDefault, right: Dimensions.paddingSizeDefault, bottom: Dimensions.paddingSizeSmall, top: Dimensions.paddingSizeExtraSmall),
+                  child: MessageCardWidget(
+                    userTypeImage: '${Get.find<SplashController>().configModel!.logoFullUrl}',
+                    userType: '${Get.find<SplashController>().configModel!.businessName}',
+                    count: chatController.adminConversationModel.unreadMessageCount ?? 0,
+                    message: chatController.adminConversationModel.lastMessage?.message ?? 'chat_with_admin'.tr,
+                    time: _lastMessage(chatController.adminConversationModel) ?? '',
+                    onTap: () {
+                      Get.toNamed(RouteHelper.getChatRoute(notificationBody: NotificationBodyModel(
+                        notificationType: NotificationType.message, adminId: 0,
+                      )))?.then((value) => Get.find<ChatController>().getConversationList(1, type: chatController.type));
+                    },
+                  ),
+                ) : const SizedBox()),
 
                 SliverPersistentHeader(
                   pinned: true,
@@ -155,8 +201,9 @@ class _ConversationScreenState extends State<ConversationScreen> with TickerProv
                 ),
 
                 SliverToBoxAdapter(
-                  child: (conversation0 != null && conversation0.conversations != null) ? conversation0.conversations!.isNotEmpty  ? conversationCart(chatController, conversation0) : Padding(
-                    padding: const EdgeInsets.only(top: 100),
+                  child: (conversation0 != null && conversation0.conversations != null)
+                  ? conversation0.conversations!.isNotEmpty ? conversationCart(chatController, conversation0) : Padding(
+                    padding: EdgeInsets.only(top: context.height * 0.25),
                     child: Center(child: Column(
                       children: [
                         const CustomAssetImageWidget(
@@ -171,9 +218,9 @@ class _ConversationScreenState extends State<ConversationScreen> with TickerProv
                         ),
                       ],
                     )),
-                  ) : const Padding(
-                    padding: EdgeInsets.only(top: 100),
-                    child: Center(child: CircularProgressIndicator()),
+                  ) : Padding(
+                    padding: EdgeInsets.only(top: context.height * 0.25),
+                    child: const Center(child: CircularProgressIndicator()),
                   ),
 
                 ),
@@ -208,7 +255,8 @@ class _ConversationScreenState extends State<ConversationScreen> with TickerProv
 
             User? user;
             String? type;
-            if(conversation.senderType == UserType.vendor.name) {
+
+            if(conversation.senderType == UserType.vendor.name || conversation.senderType == UserType.user.name) {
               user = conversation.receiver;
               type = conversation.receiverType;
             }else {
@@ -218,19 +266,19 @@ class _ConversationScreenState extends State<ConversationScreen> with TickerProv
 
             String? lastMessage = _lastMessage(conversation0.conversations![index]);
 
-            bool isUnread = conversation.unreadMessageCount! > 0 && conversation.lastMessage != null && conversation.lastMessage!.senderId == user!.id;
+            bool isUnread = conversation.unreadMessageCount! > 0 && conversation.lastMessage != null && conversation.lastMessage!.senderId == user?.id;
 
-            return Container(
+            return (type == UserType.admin.name) ? const SizedBox() : (type == chatController.type) ? Container(
               margin: const EdgeInsets.symmetric(vertical: Dimensions.paddingSizeExtraSmall),
               decoration: BoxDecoration(
                 color: isUnread ? Theme.of(context).primaryColor.withOpacity(0.03) : Theme.of(context).cardColor,
                 borderRadius: BorderRadius.circular(7),
-                boxShadow: [BoxShadow(color: isUnread ? Theme.of(context).primaryColor.withOpacity(0.02) : Colors.black.withOpacity(0.07), blurRadius: 4, spreadRadius: 0)],
+                boxShadow: [BoxShadow(color: isUnread ? Colors.transparent : Colors.black.withOpacity(0.07), blurRadius: 4, spreadRadius: 0)],
               ),
               child: CustomInkWellWidget(
-                onTap: (){
+                onTap: () async{
                   if(user != null){
-                    Get.toNamed(RouteHelper.getChatRoute(
+                    await Get.toNamed(RouteHelper.getChatRoute(
                       notificationBody: NotificationBodyModel(
                         type: conversation.senderType,
                         notificationType: NotificationType.message,
@@ -238,7 +286,9 @@ class _ConversationScreenState extends State<ConversationScreen> with TickerProv
                         deliveryManId: type == UserType.delivery_man.name ? user.id : null,
                       ),
                       conversationId: conversation.id,
-                    ));/*!.then((value) => Get.find<ChatController>().getConversationList(1)*/
+                      index: index,
+                    ));
+                    chatController.getConversationList(1, type: Get.find<ChatController>().type);
                   }else{
                     showCustomSnackBar('${type!.tr} ${'deleted'.tr}');
                   }
@@ -297,13 +347,13 @@ class _ConversationScreenState extends State<ConversationScreen> with TickerProv
                   ),
                 ]),
               ),
-            );
+            ) : const SizedBox();
           },
         ),
       )
-    ) : const Padding(
-      padding: EdgeInsets.only(top: 100),
-      child: Center(child: CircularProgressIndicator()),
+    ) : Padding(
+      padding: EdgeInsets.only(top: context.height * 0.25),
+      child: const Center(child: CircularProgressIndicator()),
     );
   }
 
@@ -311,6 +361,9 @@ class _ConversationScreenState extends State<ConversationScreen> with TickerProv
     if(conversation != null && conversation.lastMessage != null) {
       if(conversation.lastMessage!.message != null) {
         return conversation.lastMessage!.message;
+      }
+      else if(conversation.lastMessage!.files!.isNotEmpty) {
+        return '${conversation.lastMessage!.files!.length} ${'attachment'.tr}';
       }
     }
     return null;

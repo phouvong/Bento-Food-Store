@@ -269,6 +269,7 @@ class _AddCouponScreenState extends State<AddCouponScreen> with TickerProviderSt
                     suffixIcon: Icons.access_time_filled,
                     suffixIconColor: Theme.of(context).primaryColor,
                     onSuffixPressed: (){},
+                    onFocusChanged: false,
                     onTap: () async{
                       DateTime? pickedDate = await showDatePicker(
                         context: context,
@@ -294,6 +295,7 @@ class _AddCouponScreenState extends State<AddCouponScreen> with TickerProviderSt
                     suffixIcon: Icons.access_time_filled,
                     suffixIconColor: Theme.of(context).primaryColor,
                     onSuffixPressed: (){},
+                    onFocusChanged: false,
                     onTap: () async{
                       DateTime? pickedDate = await showDatePicker(
                         context: context,

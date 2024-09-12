@@ -18,9 +18,11 @@ class ConfirmationDialogWidget extends StatelessWidget {
   final Function onYesPressed;
   final Function? onNoPressed;
   final bool isLogOut;
-
+  final bool isOnNoPressedShow;
+  final String? onYesButtonText;
+  final String? onNoButtonText;
   const ConfirmationDialogWidget({super.key, required this.icon, this.title, required this.description, this.adminText, required this.onYesPressed,
-    this.onNoPressed, this.isLogOut = false});
+    this.onNoPressed, this.isLogOut = false, this.isOnNoPressedShow = true, this.onYesButtonText, this.onNoButtonText});
 
   @override
   Widget build(BuildContext context) {
@@ -65,21 +67,21 @@ class ConfirmationDialogWidget extends StatelessWidget {
                           return (couponController.isLoading || authController.isLoading || orderController.isLoading || campaignController.isLoading || restController.isLoading
                           || dmController.isLoading) ? const Center(child: CircularProgressIndicator()) : Row(children: [
 
-                            Expanded(child: TextButton(
+                            isOnNoPressedShow ? Expanded(child: TextButton(
                               onPressed: () => isLogOut ? onYesPressed() : onNoPressed != null ? onNoPressed!() : Get.back(),
                               style: TextButton.styleFrom(
                                 backgroundColor: Theme.of(context).disabledColor.withOpacity(0.3), minimumSize: const Size(1170, 40), padding: EdgeInsets.zero,
                                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(Dimensions.radiusSmall)),
                               ),
                               child: Text(
-                                isLogOut ? 'yes'.tr : 'no'.tr, textAlign: TextAlign.center,
+                                onNoButtonText ?? (isLogOut ? 'yes'.tr : 'no'.tr), textAlign: TextAlign.center,
                                 style: robotoBold.copyWith(color: Theme.of(context).textTheme.bodyLarge!.color),
                               ),
-                            )),
-                            const SizedBox(width: Dimensions.paddingSizeLarge),
+                            )) : const SizedBox(),
+                            SizedBox(width: isOnNoPressedShow ? Dimensions.paddingSizeLarge : 0),
 
                             Expanded(child: CustomButtonWidget(
-                              buttonText: isLogOut ? 'no'.tr : 'yes'.tr,
+                              buttonText: onYesButtonText ?? (isLogOut ? 'no'.tr : 'yes'.tr),
                               onPressed: () => isLogOut ? Get.back() : onYesPressed(),
                               height: 40,
                             )),

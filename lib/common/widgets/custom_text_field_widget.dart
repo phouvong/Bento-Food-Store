@@ -46,6 +46,7 @@ class CustomTextFieldWidget extends StatefulWidget {
   final Color? suffixIconColor;
   final bool hideEnableText;
   final int? maxLength;
+  final bool onFocusChanged;
 
   const CustomTextFieldWidget({
     super.key,
@@ -88,6 +89,7 @@ class CustomTextFieldWidget extends StatefulWidget {
     this.suffixIconColor,
     this.hideEnableText = false,
     this.maxLength,
+    this.onFocusChanged = true,
   });
 
   @override
@@ -98,6 +100,15 @@ class CustomTextFieldWidgetState extends State<CustomTextFieldWidget> {
 
   bool _obscureText = true;
 
+  void onFocusChanged(){
+    FocusScope.of(context).unfocus();
+    FocusScope.of(Get.context!).requestFocus(widget.focusNode);
+    widget.focusNode?.addListener(() {
+      setState(() {
+      });
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
@@ -106,6 +117,7 @@ class CustomTextFieldWidgetState extends State<CustomTextFieldWidget> {
       SizedBox(height: widget.showTitle ? Dimensions.paddingSizeExtraSmall : 0),
 
       TextFormField(
+        onTap: widget.onFocusChanged ? onFocusChanged : widget.onTap as void Function()?,
         maxLines: widget.maxLines,
         controller: widget.controller,
         focusNode: widget.focusNode,
@@ -144,14 +156,17 @@ class CustomTextFieldWidgetState extends State<CustomTextFieldWidget> {
           isDense: true,
           hintText: widget.hintText,
           fillColor: Theme.of(context).cardColor,
-          hintStyle: robotoRegular.copyWith(fontSize: Dimensions.fontSizeDefault, color: Theme.of(context).hintColor),
+          hintStyle: robotoRegular.copyWith(fontSize: Dimensions.fontSizeDefault, color: Theme.of(context).hintColor.withOpacity(0.7)),
           filled: true,
           labelStyle : widget.showLabelText ? robotoRegular.copyWith(
               fontSize: Dimensions.fontSizeDefault,
               color: Theme.of(context).hintColor):null,
           errorStyle: robotoRegular.copyWith(fontSize: Dimensions.fontSizeSmall),
           label: widget.showLabelText ? Text.rich(TextSpan(children: [
-            TextSpan(text: widget.labelText ?? '', style: robotoRegular.copyWith(fontSize: widget.levelTextSize ?? Dimensions.fontSizeDefault, color: Theme.of(context).hintColor.withOpacity(.75))),
+            TextSpan(text: widget.labelText ?? '', style: robotoRegular.copyWith(
+              fontSize: widget.levelTextSize ?? Dimensions.fontSizeDefault,
+              color: ((widget.focusNode?.hasFocus == true || widget.controller!.text.isNotEmpty ) &&  widget.isEnabled) ? Theme.of(context).textTheme.bodyLarge?.color :  Theme.of(context).hintColor.withOpacity(0.7),
+            )),
             if(widget.required && widget.labelText != null)
               TextSpan(text : ' *', style: robotoRegular.copyWith(color: Theme.of(context).colorScheme.error, fontSize: Dimensions.fontSizeDefault)),
             if(widget.isEnabled == false)
@@ -190,7 +205,7 @@ class CustomTextFieldWidgetState extends State<CustomTextFieldWidget> {
           ) : widget.prefixImage != null && widget.prefixIcon == null ? Padding(
             padding: const EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeSmall, vertical: Dimensions.paddingSizeDefault),
             child: Image.asset(widget.prefixImage!, height: 20, width: 20),
-          ) : widget.prefixImage == null && widget.prefixIcon != null ? Icon(widget.prefixIcon, size: widget.iconSize, color: Theme.of(context).disabledColor.withOpacity(0.5)) : null,
+          ) : widget.prefixImage == null && widget.prefixIcon != null ? Icon(widget.prefixIcon, size: widget.iconSize, color: widget.focusNode?.hasFocus == true ? Theme.of(context).textTheme.bodyLarge?.color : Theme.of(context).hintColor.withOpacity(0.7)) : null,
           suffixIcon: widget.suffixIcon != null && !widget.isPassword ?
               Icon(widget.suffixIcon, color: widget.suffixIconColor ?? Theme.of(context).disabledColor, size: 22)
               : widget.isPassword ? IconButton(
@@ -198,7 +213,6 @@ class CustomTextFieldWidgetState extends State<CustomTextFieldWidget> {
             onPressed: _toggle,
           ) : null,
         ),
-        onTap: widget.onTap as void Function()?,
         onFieldSubmitted: (text) => widget.nextFocus != null ? FocusScope.of(context).requestFocus(widget.nextFocus)
             : widget.onSubmit != null ? widget.onSubmit!(text) : null,
         onChanged: widget.onChanged as void Function(String)?,

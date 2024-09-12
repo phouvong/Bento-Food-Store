@@ -49,26 +49,28 @@ class ReportRepository implements ReportRepositoryInterface {
   }
 
   @override
+  Future<Response> getTransactionReportStatement({required int orderId}) async {
+    Response response = await apiClient.getData('${AppConstants.getTransactionStatement}?order_id=$orderId');
+    return response;
+  }
+
+  @override
   Future add(value) {
-    // TODO: implement add
     throw UnimplementedError();
   }
 
   @override
   Future delete({int? id}) {
-    // TODO: implement delete
     throw UnimplementedError();
   }
 
   @override
   Future get(int id) {
-    // TODO: implement get
     throw UnimplementedError();
   }
 
   @override
   Future getList() {
-    // TODO: implement getList
     throw UnimplementedError();
   }
 

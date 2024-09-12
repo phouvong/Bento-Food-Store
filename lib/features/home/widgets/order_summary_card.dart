@@ -16,31 +16,34 @@ class OrderSummaryCard extends StatelessWidget {
       padding: const EdgeInsets.all(Dimensions.paddingSizeLarge),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
-        color: Theme.of(context).primaryColor,
+        color: Theme.of(context).colorScheme.tertiary,
       ),
       child: Column(children: [
 
-        Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+        Padding(
+          padding: const EdgeInsets.only(left: Dimensions.paddingSizeDefault),
+          child: Row(mainAxisAlignment: MainAxisAlignment.start, children: [
 
-          Image.asset(Images.wallet, width: 60, height: 60),
-          const SizedBox(width: Dimensions.paddingSizeLarge),
+            Image.asset(Images.wallet, width: 60, height: 60),
+            const SizedBox(width: Dimensions.paddingSizeLarge),
 
-          Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+            Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
 
-            Text(
-              'today'.tr,
-              style: robotoMedium.copyWith(fontSize: Dimensions.fontSizeSmall, color: Theme.of(context).cardColor),
-            ),
-            const SizedBox(height: Dimensions.paddingSizeSmall),
+              Text(
+                'today'.tr,
+                style: robotoMedium.copyWith(fontSize: Dimensions.fontSizeSmall, color: Theme.of(context).cardColor),
+              ),
+              const SizedBox(height: Dimensions.paddingSizeSmall),
 
-            Text(
-              profileController.profileModel != null ? PriceConverter.convertPrice(profileController.profileModel!.todaysEarning) : '0',
-              style: robotoBold.copyWith(fontSize: 24, color: Theme.of(context).cardColor), textDirection: TextDirection.ltr,
-            ),
+              Text(
+                profileController.profileModel != null ? PriceConverter.convertPrice(profileController.profileModel!.todaysEarning) : '0',
+                style: robotoBold.copyWith(fontSize: 24, color: Theme.of(context).cardColor), textDirection: TextDirection.ltr,
+              ),
+
+            ]),
 
           ]),
-
-        ]),
+        ),
         const SizedBox(height: 30),
 
         Row(children: [
